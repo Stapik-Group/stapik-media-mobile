@@ -1,0 +1,46 @@
+<resources>
+    <string name="app_name">Stapik Media Mobile</string>
+
+    <string name="connect_title">Connect to Stapik Cloud</string>
+    <string name="connect_server_url_label">Server URL</string>
+    <string name="connect_api_key_label">API key</string>
+    <string name="connect_save_button">Save &amp; connect</string>
+    <string name="connect_testing">Connecting…</string>
+    <string name="connect_error_prefix">Connection failed: %1$s</string>
+    <string name="connect_stale_warning">Saved, but the server could not be reached — showing cached data.</string>
+    <string name="connect_show_api_key">Show</string>
+    <string name="connect_hide_api_key">Hide</string>
+
+    <string name="settings_content_description">Connection settings</string>
+
+    <string name="media_no_entries">No entries yet</string>
+    <string name="media_filter_all_years">All years</string>
+    <string name="media_filter_all_months">All months</string>
+    <string name="media_watched">Watched %1$d/%2$d</string>
+    <string name="media_error_not_connected">Not connected</string>
+
+    <string name="category_movie">Movies</string>
+    <string name="category_series">Series</string>
+    <string name="category_cartoon">Cartoons</string>
+    <string name="category_book">Books</string>
+    <string name="category_album">Albums</string>
+    <string name="category_game">Games</string>
+
+    <string name="about_title">Stapik Media (Android)</string>
+    <string name="about_version">Version %1$s</string>
+    <string name="about_description">Read-only mobile companion to Stapik Media.</string>
+
+    <string name="detail_back">Back</string>
+    <string name="detail_release_date">Release date</string>
+    <string name="detail_consumed">Watched</string>
+    <string name="detail_director">Director</string>
+    <string name="detail_genre">Genre</string>
+    <string name="detail_author">Author</string>
+    <string name="detail_audiobook">Audiobook</string>
+    <string name="detail_yes">Yes</string>
+    <string name="detail_no">No</string>
+    <string name="detail_performer">Performer</string>
+    <string name="detail_publisher">Publisher</string>
+    <string name="detail_studio">Studio</string>
+    <string name="detail_platform">Platform</string>
+</resources>

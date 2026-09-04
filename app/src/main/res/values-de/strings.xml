@@ -1,0 +1,46 @@
+<resources>
+    <string name="app_name">Stapik Media Mobile</string>
+
+    <string name="connect_title">Mit Stapik Cloud verbinden</string>
+    <string name="connect_server_url_label">Server-URL</string>
+    <string name="connect_api_key_label">API-Schlüssel</string>
+    <string name="connect_save_button">Speichern &amp; verbinden</string>
+    <string name="connect_testing">Verbindung wird hergestellt…</string>
+    <string name="connect_error_prefix">Verbindung fehlgeschlagen: %1$s</string>
+    <string name="connect_stale_warning">Gespeichert, aber der Server war nicht erreichbar — zeige zwischengespeicherte Daten.</string>
+    <string name="connect_show_api_key">Anzeigen</string>
+    <string name="connect_hide_api_key">Verbergen</string>
+
+    <string name="settings_content_description">Verbindungseinstellungen</string>
+
+    <string name="media_no_entries">Noch keine Einträge</string>
+    <string name="media_filter_all_years">Alle Jahre</string>
+    <string name="media_filter_all_months">Alle Monate</string>
+    <string name="media_watched">Angesehen %1$d/%2$d</string>
+    <string name="media_error_not_connected">Nicht verbunden</string>
+
+    <string name="category_movie">Filme</string>
+    <string name="category_series">Serien</string>
+    <string name="category_cartoon">Cartoons</string>
+    <string name="category_book">Bücher</string>
+    <string name="category_album">Alben</string>
+    <string name="category_game">Spiele</string>
+
+    <string name="about_title">Stapik Media (Android)</string>
+    <string name="about_version">Version %1$s</string>
+    <string name="about_description">Schreibgeschützte mobile Begleit-App für Stapik Media.</string>
+
+    <string name="detail_back">Zurück</string>
+    <string name="detail_release_date">Veröffentlichungsdatum</string>
+    <string name="detail_consumed">Angesehen</string>
+    <string name="detail_director">Regisseur</string>
+    <string name="detail_genre">Genre</string>
+    <string name="detail_author">Autor</string>
+    <string name="detail_audiobook">Hörbuch</string>
+    <string name="detail_yes">Ja</string>
+    <string name="detail_no">Nein</string>
+    <string name="detail_performer">Interpret</string>
+    <string name="detail_publisher">Verlag</string>
+    <string name="detail_studio">Studio</string>
+    <string name="detail_platform">Plattform</string>
+</resources>

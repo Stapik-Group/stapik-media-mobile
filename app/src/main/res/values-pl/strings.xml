@@ -1,0 +1,46 @@
+<resources>
+    <string name="app_name">Stapik Media Mobile</string>
+
+    <string name="connect_title">Połącz ze Stapik Cloud</string>
+    <string name="connect_server_url_label">Adres serwera</string>
+    <string name="connect_api_key_label">Klucz API</string>
+    <string name="connect_save_button">Zapisz i połącz</string>
+    <string name="connect_testing">Łączenie…</string>
+    <string name="connect_error_prefix">Nie udało się połączyć: %1$s</string>
+    <string name="connect_stale_warning">Zapisano, ale nie udało się połączyć z serwerem — pokazuję dane z pamięci podręcznej.</string>
+    <string name="connect_show_api_key">Pokaż</string>
+    <string name="connect_hide_api_key">Ukryj</string>
+
+    <string name="settings_content_description">Ustawienia połączenia</string>
+
+    <string name="media_no_entries">Brak wpisów</string>
+    <string name="media_filter_all_years">Wszystkie lata</string>
+    <string name="media_filter_all_months">Wszystkie miesiące</string>
+    <string name="media_watched">Obejrzano %1$d/%2$d</string>
+    <string name="media_error_not_connected">Nie połączono</string>
+
+    <string name="category_movie">Filmy</string>
+    <string name="category_series">Seriale</string>
+    <string name="category_cartoon">Bajki</string>
+    <string name="category_book">Książki</string>
+    <string name="category_album">Albumy</string>
+    <string name="category_game">Gry</string>
+
+    <string name="about_title">Stapik Media (Android)</string>
+    <string name="about_version">Wersja %1$s</string>
+    <string name="about_description">Kompanion mobilny (tylko do odczytu) dla Stapik Media.</string>
+
+    <string name="detail_back">Wstecz</string>
+    <string name="detail_release_date">Data wydania</string>
+    <string name="detail_consumed">Obejrzano</string>
+    <string name="detail_director">Reżyser</string>
+    <string name="detail_genre">Gatunek</string>
+    <string name="detail_author">Autor</string>
+    <string name="detail_audiobook">Audiobook</string>
+    <string name="detail_yes">Tak</string>
+    <string name="detail_no">Nie</string>
+    <string name="detail_performer">Wykonawca</string>
+    <string name="detail_publisher">Wydawca</string>
+    <string name="detail_studio">Studio</string>
+    <string name="detail_platform">Platforma</string>
+</resources>
