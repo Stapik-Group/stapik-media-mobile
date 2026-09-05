@@ -2,6 +2,7 @@ package pl.stapik.media.ui.media
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import pl.stapik.media.data.config.ApiConfig
 import pl.stapik.media.data.config.ApiConfigStorage
 import pl.stapik.media.data.model.MediaCategory
 import pl.stapik.media.data.repository.MediaFetchOutcome
@@ -44,21 +45,30 @@ class MediaViewModel(
                     return@launch
                 }
 
-                when (val outcome = repository.fetchEntries(config)) {
-                    is MediaFetchOutcome.Fresh ->
-                        _uiState.value = MediaUiState.Success(outcome.entries, isStale = false, outcome.updatedAt)
-
-                    is MediaFetchOutcome.Cached ->
-                        _uiState.value = MediaUiState.Success(outcome.entries, isStale = true, outcome.updatedAt)
-
-                    is MediaFetchOutcome.Failure ->
-                        _uiState.value = MediaUiState.Error(outcome.message)
-                }
+                applyOutcome(repository.fetchEntries(config))
             } catch (e: Exception) {
                 _uiState.value = MediaUiState.Error(e.message ?: e::class.simpleName ?: "Unknown error")
             } finally {
                 _isRefreshing.value = false
             }
+        }
+    }
+
+    suspend fun refreshWithConfig(config: ApiConfig): MediaFetchOutcome {
+        _uiState.value = MediaUiState.Loading
+        val outcome = repository.fetchEntries(config)
+        applyOutcome(outcome)
+        return outcome
+    }
+
+    private fun applyOutcome(outcome: MediaFetchOutcome) {
+        _uiState.value = when (outcome) {
+            is MediaFetchOutcome.Fresh ->
+                MediaUiState.Success(outcome.entries, isStale = false, outcome.updatedAt)
+            is MediaFetchOutcome.Cached ->
+                MediaUiState.Success(outcome.entries, isStale = true, outcome.updatedAt)
+            is MediaFetchOutcome.Failure ->
+                MediaUiState.Error(outcome.message)
         }
     }
 

@@ -31,6 +31,7 @@ import pl.stapik.media.R
 import pl.stapik.media.data.config.ApiConfig
 import pl.stapik.media.data.config.ApiConfigStorage
 import pl.stapik.media.data.config.ApiSchemaGuard
+import pl.stapik.media.data.repository.MediaFetchOutcome
 import pl.stapik.media.ui.about.AboutScreen
 import pl.stapik.media.ui.connect.ConnectScreen
 import pl.stapik.media.ui.connect.ConnectStatus
@@ -123,21 +124,19 @@ fun AppRoot(
                         onSave = { config ->
                             scope.launch {
                                 connectStatus = ConnectStatus.Testing
-                                configStorage.save(config)
-                                savedConfig = config
-                                viewModel.refresh()
-
-                                when (val result = viewModel.uiState.first { it !is MediaUiState.Loading }) {
-                                    is MediaUiState.Success -> if (result.isStale) {
-                                        connectStatus = ConnectStatus.Stale
-                                    } else {
+                                when (val outcome = viewModel.refreshWithConfig(config)) {
+                                    is MediaFetchOutcome.Fresh -> {
+                                        configStorage.save(config)
+                                        savedConfig = config
                                         connectStatus = ConnectStatus.Idle
                                         screen = AppScreen.Media
                                     }
 
-                                    is MediaUiState.Error -> connectStatus = ConnectStatus.Error(result.message)
-                                    is MediaUiState.NotConnected -> connectStatus = ConnectStatus.Error("unexpected state")
-                                    is MediaUiState.Loading -> Unit
+                                    is MediaFetchOutcome.Cached -> {
+                                        connectStatus = ConnectStatus.Error("No response from the server - could not verify these credentials")
+                                    }
+
+                                    is MediaFetchOutcome.Failure -> connectStatus = ConnectStatus.Error(outcome.message)
                                 }
                             }
                         },
