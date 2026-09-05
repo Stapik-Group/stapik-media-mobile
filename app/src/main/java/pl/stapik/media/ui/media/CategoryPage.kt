@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -34,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import pl.stapik.media.R
 import pl.stapik.media.data.model.MediaCategory
 import pl.stapik.media.data.model.MediaEntry
+import pl.stapik.media.ui.theme.RetroButton
 import pl.stapik.media.ui.theme.RetroColorScheme
 import java.time.Month
 import java.time.format.TextStyle
@@ -207,9 +207,7 @@ private fun CenteredMessageWithAction(
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(message, color = scheme.textDark)
             Spacer(modifier = Modifier.height(12.dp))
-            Button(onClick = onAction) {
-                Text(actionLabel)
-            }
+            RetroButton(text = actionLabel, onClick = onAction, scheme = scheme)
         }
     }
 }

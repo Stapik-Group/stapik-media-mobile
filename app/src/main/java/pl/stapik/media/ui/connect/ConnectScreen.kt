@@ -1,5 +1,6 @@
 package pl.stapik.media.ui.connect
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -7,14 +8,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,7 +28,9 @@ import pl.stapik.media.data.config.ApiConfig
 import pl.stapik.media.ui.common.ScreenHeader
 import pl.stapik.media.ui.media.MediaLoadError
 import pl.stapik.media.ui.media.toDisplayMessage
+import pl.stapik.media.ui.theme.RetroButton
 import pl.stapik.media.ui.theme.RetroColorScheme
+import pl.stapik.media.ui.theme.RetroTextField
 
 sealed interface ConnectStatus {
     data object Idle : ConnectStatus
@@ -58,28 +56,28 @@ fun ConnectScreen(
         ScreenHeader(title = stringResource(R.string.connect_title), scheme = scheme, onBack = onBack)
 
         Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-            OutlinedTextField(
+            RetroTextField(
                 value = serverUrl,
                 onValueChange = { serverUrl = it },
-                label = { Text(stringResource(R.string.connect_server_url_label)) },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
-                colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = scheme.accent),
+                label = stringResource(R.string.connect_server_url_label),
+                scheme = scheme,
+                keyboardType = KeyboardType.Uri,
                 modifier = Modifier.fillMaxWidth(),
             )
 
-            OutlinedTextField(
+            RetroTextField(
                 value = apiKey,
                 onValueChange = { apiKey = it },
-                label = { Text(stringResource(R.string.connect_api_key_label)) },
-                singleLine = true,
+                label = stringResource(R.string.connect_api_key_label),
+                scheme = scheme,
                 visualTransformation = if (apiKeyVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                trailingIcon = {
-                    TextButton(onClick = { apiKeyVisible = !apiKeyVisible }) {
-                        Text(stringResource(if (apiKeyVisible) R.string.connect_hide_api_key else R.string.connect_show_api_key))
-                    }
+                trailingContent = {
+                    Text(
+                        text = stringResource(if (apiKeyVisible) R.string.connect_hide_api_key else R.string.connect_show_api_key),
+                        color = scheme.accent,
+                        modifier = Modifier.clickable { apiKeyVisible = !apiKeyVisible },
+                    )
                 },
-                colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = scheme.accent),
                 modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
             )
 
@@ -108,13 +106,13 @@ fun ConnectScreen(
                 ConnectStatus.Idle -> Unit
             }
 
-            Button(
+            RetroButton(
+                text = stringResource(R.string.connect_save_button),
                 onClick = { onSave(ApiConfig(normalizeUrl(serverUrl.trim()), apiKey.trim())) },
+                scheme = scheme,
                 enabled = status !is ConnectStatus.Testing,
                 modifier = Modifier.padding(top = 16.dp),
-            ) {
-                Text(stringResource(R.string.connect_save_button))
-            }
+            )
         }
     }
 }

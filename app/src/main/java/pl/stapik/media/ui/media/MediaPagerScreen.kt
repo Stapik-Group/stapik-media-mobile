@@ -2,12 +2,18 @@ package pl.stapik.media.ui.media
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardArrowRight
@@ -25,10 +31,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import pl.stapik.media.data.model.MediaCategory
 import pl.stapik.media.data.model.MediaEntry
 import pl.stapik.media.ui.theme.RetroColorScheme
+import pl.stapik.media.ui.theme.ThemeShape
+import pl.stapik.media.ui.theme.retroBevel
 
 @Composable
 fun MediaPagerScreen(
@@ -48,20 +58,49 @@ fun MediaPagerScreen(
     Box(modifier = modifier.fillMaxSize().background(scheme.windowBackground)) {
         Column(modifier = Modifier.fillMaxSize()) {
             Box(modifier = Modifier.fillMaxWidth()) {
-                ScrollableTabRow(
-                    selectedTabIndex = pagerState.currentPage,
-                    containerColor = scheme.headerGradientStart,
-                    contentColor = scheme.textOnHeader,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Brush.horizontalGradient(listOf(scheme.headerGradientStart, scheme.headerGradientEnd))),
-                ) {
-                    categories.forEachIndexed { index, category ->
-                        Tab(
-                            selected = pagerState.currentPage == index,
-                            onClick = { scope.launch { pagerState.animateScrollToPage(index) } },
-                            text = { Text(category.displayName()) },
-                        )
+                when (scheme.shape) {
+                    ThemeShape.BEVEL -> Row(
+                        horizontalArrangement = Arrangement.spacedBy(2.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(Brush.horizontalGradient(listOf(scheme.headerGradientStart, scheme.headerGradientEnd)))
+                            .horizontalScroll(rememberScrollState())
+                            .padding(4.dp),
+                    ) {
+                        categories.forEachIndexed { index, category ->
+                            val selected = pagerState.currentPage == index
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier
+                                    .background(if (selected) scheme.cardBackground else scheme.windowBackground)
+                                    .retroBevel(scheme, raised = true)
+                                    .clickable { scope.launch { pagerState.animateScrollToPage(index) } }
+                                    .padding(horizontal = 14.dp, vertical = 8.dp),
+                            ) {
+                                Text(
+                                    text = category.displayName(),
+                                    color = scheme.textDark,
+                                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+                                )
+                            }
+                        }
+                    }
+
+                    ThemeShape.FLAT -> ScrollableTabRow(
+                        selectedTabIndex = pagerState.currentPage,
+                        containerColor = scheme.headerGradientStart,
+                        contentColor = scheme.textOnHeader,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(Brush.horizontalGradient(listOf(scheme.headerGradientStart, scheme.headerGradientEnd))),
+                    ) {
+                        categories.forEachIndexed { index, category ->
+                            Tab(
+                                selected = pagerState.currentPage == index,
+                                onClick = { scope.launch { pagerState.animateScrollToPage(index) } },
+                                text = { Text(category.displayName()) },
+                            )
+                        }
                     }
                 }
 

@@ -51,7 +51,7 @@ val ModernColors = RetroColorScheme(
 )
 
 val ClassicPinkColors = RetroColorScheme(
-    shape = ThemeShape.FLAT,
+    shape = ThemeShape.BEVEL,
     windowBackground = Color(0xFFF4B6DD),
     cardBackground = Color(0xFFF9CBE6),
     headerGradientStart = Color(0xFFFF6EC7),

@@ -1,7 +1,9 @@
 package pl.stapik.media.ui.theme
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -37,7 +39,7 @@ fun ThemeScreen(
 
         Column(
             verticalArrangement = Arrangement.spacedBy(12.dp),
-            modifier = Modifier.padding(horizontal = 16.dp),
+            modifier = Modifier.padding(16.dp),
         ) {
             options.forEach { (theme, labelRes) ->
                 ThemeOptionRow(
@@ -53,17 +55,36 @@ fun ThemeScreen(
 
 @Composable
 private fun ThemeOptionRow(label: String, selected: Boolean, scheme: RetroColorScheme, onClick: () -> Unit) {
-    Surface(
-        shape = RoundedCornerShape(16.dp),
-        color = if (selected) scheme.selectedBackground else scheme.cardBackground,
-        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
-    ) {
-        Text(
-            text = label,
-            color = if (selected) scheme.selectedText else scheme.textDark,
-            fontWeight = FontWeight.Bold,
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(20.dp),
-        )
+    when (scheme.shape) {
+        // A selected option looks pressed-in (sunken bevel) - the same
+        // language Win98 uses for a highlighted/active list item.
+        ThemeShape.BEVEL -> Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(if (selected) scheme.selectedBackground else scheme.cardBackground)
+                .retroBevel(scheme, raised = !selected)
+                .clickable(onClick = onClick)
+                .padding(20.dp),
+        ) {
+            Text(
+                text = label,
+                color = if (selected) scheme.selectedText else scheme.textDark,
+                fontWeight = FontWeight.Bold,
+            )
+        }
+
+        ThemeShape.FLAT -> Surface(
+            shape = RoundedCornerShape(16.dp),
+            color = if (selected) scheme.selectedBackground else scheme.cardBackground,
+            modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
+        ) {
+            Text(
+                text = label,
+                color = if (selected) scheme.selectedText else scheme.textDark,
+                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(20.dp),
+            )
+        }
     }
 }
