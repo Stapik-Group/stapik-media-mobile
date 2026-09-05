@@ -47,7 +47,7 @@ class MediaViewModel(
 
                 applyOutcome(repository.fetchEntries(config))
             } catch (e: Exception) {
-                _uiState.value = MediaUiState.Error(e.message ?: e::class.simpleName ?: "Unknown error")
+                _uiState.value = MediaUiState.Error(e.toMediaLoadError())
             } finally {
                 _isRefreshing.value = false
             }
@@ -68,7 +68,7 @@ class MediaViewModel(
             is MediaFetchOutcome.Cached ->
                 MediaUiState.Success(outcome.entries, isStale = true, outcome.updatedAt)
             is MediaFetchOutcome.Failure ->
-                MediaUiState.Error(outcome.message)
+                MediaUiState.Error(outcome.cause.toMediaLoadError())
         }
     }
 

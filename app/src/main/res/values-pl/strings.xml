@@ -57,4 +57,10 @@
     <string name="menu_about">O aplikacji</string>
 
     <string name="about_author">Sebastian Smoliński</string>
+
+    <string name="error_no_network">Brak połączenia z siecią.</string>
+    <string name="error_unauthorized">Nieprawidłowy adres serwera lub klucz API.</string>
+    <string name="error_not_found">Nie znaleziono dziennika mediów na serwerze. Sprawdź ustawienia połączenia.</string>
+    <string name="error_cannot_verify">Brak odpowiedzi z serwera - nie udało się zweryfikować tych danych.</string>
+    <string name="error_unknown">Coś poszło nie tak: %1$s</string>
 </resources>

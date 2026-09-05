@@ -64,7 +64,7 @@ fun CategoryPage(
 
         is MediaUiState.Error -> Box(modifier.fillMaxSize()) {
             Text(
-                text = stringResource(R.string.connect_error_prefix, state.message),
+                text = state.error.toDisplayMessage(),
                 color = scheme.textDark,
                 modifier = Modifier.align(Alignment.Center),
             )

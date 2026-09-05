@@ -12,5 +12,5 @@ sealed interface MediaUiState {
         val updatedAt: String,
     ) : MediaUiState
 
-    data class Error(val message: String) : MediaUiState
+    data class Error(val error: MediaLoadError) : MediaUiState
 }

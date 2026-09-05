@@ -25,7 +25,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import pl.stapik.media.R
 import pl.stapik.media.data.config.ApiConfig
@@ -35,9 +34,10 @@ import pl.stapik.media.data.repository.MediaFetchOutcome
 import pl.stapik.media.ui.about.AboutScreen
 import pl.stapik.media.ui.connect.ConnectScreen
 import pl.stapik.media.ui.connect.ConnectStatus
+import pl.stapik.media.ui.media.MediaLoadError
 import pl.stapik.media.ui.media.MediaPagerScreen
-import pl.stapik.media.ui.media.MediaUiState
 import pl.stapik.media.ui.media.MediaViewModel
+import pl.stapik.media.ui.media.toMediaLoadError
 import pl.stapik.media.ui.theme.AppTheme
 import pl.stapik.media.ui.theme.ThemePreferenceStorage
 import pl.stapik.media.ui.theme.ThemeScreen
@@ -133,10 +133,11 @@ fun AppRoot(
                                     }
 
                                     is MediaFetchOutcome.Cached -> {
-                                        connectStatus = ConnectStatus.Error("No response from the server - could not verify these credentials")
+                                        connectStatus = ConnectStatus.Error(MediaLoadError.CannotVerify)
                                     }
 
-                                    is MediaFetchOutcome.Failure -> connectStatus = ConnectStatus.Error(outcome.message)
+                                    is MediaFetchOutcome.Failure ->
+                                        connectStatus = ConnectStatus.Error(outcome.cause.toMediaLoadError())
                                 }
                             }
                         },

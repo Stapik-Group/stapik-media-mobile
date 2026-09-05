@@ -14,11 +14,6 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.IOException
 
-/**
- * Read-only client for the Stapik Cloud `/documents/{slotKey}` endpoint
- * (slotKey = "media.json"), the same server and protocol stapikmedia itself
- * talks to. Falls back to the last cached copy on any network failure.
- */
 class MediaRepository(
     private val cache: MediaCacheStorage,
     private val client: OkHttpClient = OkHttpClient(),
@@ -36,7 +31,7 @@ class MediaRepository(
                 if (cached != null) {
                     MediaFetchOutcome.Cached(cached.entries, cached.updatedAt)
                 } else {
-                    MediaFetchOutcome.Failure(error.message ?: "Unknown network error")
+                    MediaFetchOutcome.Failure(error)
                 }
             },
         )
@@ -52,7 +47,7 @@ class MediaRepository(
 
         client.newCall(request).execute().use { response ->
             if (!response.isSuccessful) {
-                throw IOException("Stapik Cloud returned HTTP ${response.code}")
+                throw MediaHttpException(response.code, "Stapik Cloud returned HTTP ${response.code}")
             }
             val body = response.body?.string() ?: throw IOException("Empty response body")
             // DocumentResponse { slotKey, content, contentHash, updatedAt }
@@ -62,3 +57,5 @@ class MediaRepository(
         }
     }
 }
+
+class MediaHttpException(val code: Int, message: String) : IOException(message)

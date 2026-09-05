@@ -57,4 +57,10 @@
     <string name="menu_about">About</string>
 
     <string name="about_author">Sebastian Smoliński</string>
+
+    <string name="error_no_network">No network connection.</string>
+    <string name="error_unauthorized">Invalid server URL or API key.</string>
+    <string name="error_not_found">Media log not found on the server. Check your connection settings.</string>
+    <string name="error_cannot_verify">No response from the server - could not verify these credentials.</string>
+    <string name="error_unknown">Something went wrong: %1$s</string>
 </resources>

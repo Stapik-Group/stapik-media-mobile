@@ -30,13 +30,15 @@ import androidx.compose.ui.unit.dp
 import pl.stapik.media.R
 import pl.stapik.media.data.config.ApiConfig
 import pl.stapik.media.ui.common.ScreenHeader
+import pl.stapik.media.ui.media.MediaLoadError
+import pl.stapik.media.ui.media.toDisplayMessage
 import pl.stapik.media.ui.theme.RetroColorScheme
 
 sealed interface ConnectStatus {
     data object Idle : ConnectStatus
     data object Testing : ConnectStatus
     data object Stale : ConnectStatus
-    data class Error(val message: String) : ConnectStatus
+    data class Error(val error: MediaLoadError) : ConnectStatus
 }
 
 @Composable
@@ -98,7 +100,7 @@ fun ConnectScreen(
                 )
 
                 is ConnectStatus.Error -> Text(
-                    text = stringResource(R.string.connect_error_prefix, status.message),
+                    text = stringResource(R.string.connect_error_prefix, status.error.toDisplayMessage()),
                     color = MaterialTheme.colorScheme.error,
                     modifier = Modifier.padding(top = 12.dp),
                 )
