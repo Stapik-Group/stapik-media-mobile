@@ -1,6 +1,7 @@
 package pl.stapik.media.data.cache
 
 import android.content.Context
+import android.util.Log
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -37,9 +38,14 @@ class DataStoreMediaCacheStorage(private val context: Context) : MediaCacheStora
         val entriesJson = prefs[Keys.ENTRIES] ?: return null
         val updatedAt = prefs[Keys.UPDATED_AT] ?: return null
 
-        val array = Json.parseToJsonElement(entriesJson).jsonArray
-        val entries = array.map { MediaEntrySerializer.fromJson(it.jsonObject) }
-        return CachedMedia(entries, updatedAt)
+        return runCatching {
+            val array = Json.parseToJsonElement(entriesJson).jsonArray
+            val entries = array.map { MediaEntrySerializer.fromJson(it.jsonObject) }
+            CachedMedia(entries, updatedAt)
+        }.getOrElse { error ->
+            Log.w(TAG, "Failed to decode cached media entries", error)
+            null
+        }
     }
 
     override suspend fun save(cached: CachedMedia) {
@@ -49,6 +55,9 @@ class DataStoreMediaCacheStorage(private val context: Context) : MediaCacheStora
             prefs[Keys.UPDATED_AT] = cached.updatedAt
         }
     }
-}
 
+    private companion object {
+        const val TAG = "DataStoreMediaCacheStorage"
+    }
+}
 fun MediaDocument.toCached() = CachedMedia(entries = entries, updatedAt = lastUpdate)

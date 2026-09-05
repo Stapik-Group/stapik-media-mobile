@@ -32,7 +32,7 @@ class MediaRepository(
                 MediaFetchOutcome.Fresh(document.entries, document.lastUpdate)
             },
             onFailure = { error ->
-                val cached = cache.load()
+                val cached = runCatching { cache.load() }.getOrNull()
                 if (cached != null) {
                     MediaFetchOutcome.Cached(cached.entries, cached.updatedAt)
                 } else {
