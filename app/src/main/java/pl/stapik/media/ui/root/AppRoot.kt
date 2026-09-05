@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FloatingActionButton
@@ -20,13 +21,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import pl.stapik.media.R
 import pl.stapik.media.data.config.ApiConfig
 import pl.stapik.media.data.config.ApiConfigStorage
+import pl.stapik.media.data.config.ApiSchemaGuard
 import pl.stapik.media.ui.about.AboutScreen
 import pl.stapik.media.ui.connect.ConnectScreen
 import pl.stapik.media.ui.connect.ConnectStatus
@@ -45,6 +49,22 @@ fun AppRoot(
     themeStorage: ThemePreferenceStorage,
     viewModel: MediaViewModel,
 ) {
+    val context = LocalContext.current
+    val apiSchemaGuard = remember { ApiSchemaGuard(context.applicationContext, configStorage) }
+    var schemaChecked by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        apiSchemaGuard.ensureCurrentSchema()
+        schemaChecked = true
+    }
+
+    if (!schemaChecked) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+        return
+    }
+
     var screen by remember { mutableStateOf<AppScreen>(AppScreen.Media) }
     var savedConfig by remember { mutableStateOf<ApiConfig?>(null) }
     var connectStatus by remember { mutableStateOf<ConnectStatus>(ConnectStatus.Idle) }
