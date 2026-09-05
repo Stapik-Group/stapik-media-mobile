@@ -43,4 +43,18 @@
     <string name="detail_publisher">Wydawca</string>
     <string name="detail_studio">Studio</string>
     <string name="detail_platform">Platforma</string>
+
+    <string name="media_stale_banner">Dane z pamięci podręcznej z %1$s</string>
+
+    <string name="settings_theme_label">Motyw</string>
+    <string name="theme_classic">Klasyczny</string>
+    <string name="theme_modern">Nowoczesny</string>
+    <string name="theme_classic_pink">Klasyczny róż</string>
+    <string name="about_button">O aplikacji</string>
+    <string name="about_source_code">Zobacz kod źródłowy na GitHub</string>
+
+    <string name="menu_connect">Połącz</string>
+    <string name="menu_about">O aplikacji</string>
+
+    <string name="about_author">Sebastian Smoliński</string>
 </resources>

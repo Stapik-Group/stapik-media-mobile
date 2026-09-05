@@ -14,10 +14,6 @@ import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 import java.time.LocalDate
 
-/**
- * Field-for-field mirror of the desktop app's `MediaEntrySerializer.cpp`.
- * Any change to the JSON shape on the desktop side must be mirrored here.
- */
 object MediaEntrySerializer {
 
     fun toJson(entry: MediaEntry): JsonObject = buildJsonObject {

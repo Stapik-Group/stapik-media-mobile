@@ -43,4 +43,18 @@
     <string name="detail_publisher">Publisher</string>
     <string name="detail_studio">Studio</string>
     <string name="detail_platform">Platform</string>
+
+    <string name="media_stale_banner">Showing cached data from %1$s</string>
+
+    <string name="settings_theme_label">Theme</string>
+    <string name="theme_classic">Classic</string>
+    <string name="theme_modern">Modern</string>
+    <string name="theme_classic_pink">Classic Pink</string>
+    <string name="about_button">About</string>
+    <string name="about_source_code">View source on GitHub</string>
+
+    <string name="menu_connect">Connect</string>
+    <string name="menu_about">About</string>
+
+    <string name="about_author">Sebastian Smoliński</string>
 </resources>

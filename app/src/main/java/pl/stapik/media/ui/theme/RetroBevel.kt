@@ -9,13 +9,6 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
-/**
- * Draws a panel background+border matching this theme's [ThemeShape]:
- * a raised Win98 bevel for Classic (light border top/left, dark border
- * bottom/right), or a flat rounded card for Modern/Classic Pink.
- * Mirrors retroBevel from stapikcalendar-android, extended with the flat
- * variant per the full-theme-parity decision.
- */
 fun Modifier.retroPanel(
     scheme: RetroColorScheme,
     cornerRadius: Dp = 8.dp,

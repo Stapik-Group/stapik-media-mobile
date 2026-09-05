@@ -4,11 +4,15 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -30,74 +34,113 @@ import pl.stapik.media.ui.media.MediaPagerScreen
 import pl.stapik.media.ui.media.MediaUiState
 import pl.stapik.media.ui.media.MediaViewModel
 import pl.stapik.media.ui.theme.AppTheme
+import pl.stapik.media.ui.theme.ThemePreferenceStorage
+import pl.stapik.media.ui.theme.ThemeScreen
 import pl.stapik.media.ui.theme.colorsFor
+import pl.stapik.media.ui.theme.toMaterialColorScheme
 
 @Composable
 fun AppRoot(
     configStorage: ApiConfigStorage,
+    themeStorage: ThemePreferenceStorage,
     viewModel: MediaViewModel,
-    theme: AppTheme = AppTheme.CLASSIC,
 ) {
     var screen by remember { mutableStateOf<AppScreen>(AppScreen.Media) }
     var savedConfig by remember { mutableStateOf<ApiConfig?>(null) }
     var connectStatus by remember { mutableStateOf<ConnectStatus>(ConnectStatus.Idle) }
+    var currentTheme by remember { mutableStateOf(AppTheme.CLASSIC) }
+    var menuExpanded by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
-    val scheme = colorsFor(theme)
+    val scheme = colorsFor(currentTheme)
 
     LaunchedEffect(Unit) {
         savedConfig = configStorage.load()
+        currentTheme = themeStorage.load()
         if (savedConfig == null) screen = AppScreen.Connect
     }
 
-    // Only intercept back on Connect if there's already a working config to
-    // fall back to - on first run (no config yet) there's nowhere else to go.
-    BackHandler(enabled = screen is AppScreen.Connect && savedConfig != null) {
-        screen = AppScreen.Media
-    }
+    val canGoBackToMedia = screen != AppScreen.Media && !(screen is AppScreen.Connect && savedConfig == null)
+    BackHandler(enabled = canGoBackToMedia) { screen = AppScreen.Media }
 
-    Scaffold(
-        floatingActionButton = {
-            FloatingActionButton(onClick = { screen = AppScreen.Connect }) {
-                Icon(Icons.Filled.Settings, contentDescription = stringResource(R.string.settings_content_description))
-            }
-        },
-    ) { innerPadding ->
-        Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
-            when (screen) {
-                is AppScreen.Media -> MediaPagerScreen(
-                    viewModel = viewModel,
-                    scheme = scheme,
-                    modifier = Modifier.fillMaxSize(),
-                )
+    MaterialTheme(colorScheme = scheme.toMaterialColorScheme()) {
+        Scaffold(
+            floatingActionButton = {
+                Box {
+                    FloatingActionButton(onClick = { menuExpanded = true }) {
+                        Icon(Icons.Filled.Settings, contentDescription = stringResource(R.string.settings_content_description))
+                    }
 
-                is AppScreen.Connect -> ConnectScreen(
-                    initialConfig = savedConfig,
-                    status = connectStatus,
-                    onSave = { config ->
-                        scope.launch {
-                            connectStatus = ConnectStatus.Testing
-                            configStorage.save(config)
-                            savedConfig = config
-                            viewModel.refresh()
+                    DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.menu_connect)) },
+                            onClick = { menuExpanded = false; screen = AppScreen.Connect },
+                        )
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.settings_theme_label)) },
+                            onClick = { menuExpanded = false; screen = AppScreen.Theme },
+                        )
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.menu_about)) },
+                            onClick = { menuExpanded = false; screen = AppScreen.About },
+                        )
+                    }
+                }
+            },
+        ) { innerPadding ->
+            Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
+                when (screen) {
+                    is AppScreen.Media -> MediaPagerScreen(
+                        viewModel = viewModel,
+                        scheme = scheme,
+                        modifier = Modifier.fillMaxSize(),
+                    )
 
-                            when (val result = viewModel.uiState.first { it !is MediaUiState.Loading }) {
-                                is MediaUiState.Success -> if (result.isStale) {
-                                    connectStatus = ConnectStatus.Stale
-                                } else {
-                                    connectStatus = ConnectStatus.Idle
-                                    screen = AppScreen.Media
+                    is AppScreen.Connect -> ConnectScreen(
+                        initialConfig = savedConfig,
+                        status = connectStatus,
+                        scheme = scheme,
+                        onBack = if (savedConfig != null) { { screen = AppScreen.Media } } else null,
+                        onSave = { config ->
+                            scope.launch {
+                                connectStatus = ConnectStatus.Testing
+                                configStorage.save(config)
+                                savedConfig = config
+                                viewModel.refresh()
+
+                                when (val result = viewModel.uiState.first { it !is MediaUiState.Loading }) {
+                                    is MediaUiState.Success -> if (result.isStale) {
+                                        connectStatus = ConnectStatus.Stale
+                                    } else {
+                                        connectStatus = ConnectStatus.Idle
+                                        screen = AppScreen.Media
+                                    }
+
+                                    is MediaUiState.Error -> connectStatus = ConnectStatus.Error(result.message)
+                                    is MediaUiState.NotConnected -> connectStatus = ConnectStatus.Error("unexpected state")
+                                    is MediaUiState.Loading -> Unit
                                 }
-
-                                is MediaUiState.Error -> connectStatus = ConnectStatus.Error(result.message)
-                                is MediaUiState.NotConnected -> connectStatus = ConnectStatus.Error("unexpected state")
-                                is MediaUiState.Loading -> Unit
                             }
-                        }
-                    },
-                    modifier = Modifier.fillMaxSize(),
-                )
+                        },
+                        modifier = Modifier.fillMaxSize(),
+                    )
 
-                is AppScreen.About -> AboutScreen(modifier = Modifier.fillMaxSize())
+                    is AppScreen.Theme -> ThemeScreen(
+                        currentTheme = currentTheme,
+                        scheme = scheme,
+                        onSelect = { theme ->
+                            currentTheme = theme
+                            scope.launch { themeStorage.save(theme) }
+                        },
+                        onBack = { screen = AppScreen.Media },
+                        modifier = Modifier.fillMaxSize(),
+                    )
+
+                    is AppScreen.About -> AboutScreen(
+                        scheme = scheme,
+                        onBack = { screen = AppScreen.Media },
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                }
             }
         }
     }

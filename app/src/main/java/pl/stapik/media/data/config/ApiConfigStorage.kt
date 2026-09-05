@@ -35,9 +35,6 @@ class DataStoreApiConfigStorage(
                 apiKey = crypto.decrypt(apiKeyEnc),
             )
         } catch (_: Exception) {
-            // Stored config can no longer be decrypted (e.g. the Keystore key
-            // was invalidated). Treat it as "not configured" instead of
-            // crashing on every launch.
             clear()
             null
         }

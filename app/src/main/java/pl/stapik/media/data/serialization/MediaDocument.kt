@@ -4,6 +4,7 @@ import pl.stapik.media.data.model.MediaEntry
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 
 data class MediaDocument(
     val lastUpdate: String,
@@ -19,7 +20,7 @@ data class MediaDocument(
                 MediaEntrySerializer.fromJson(it.jsonObject)
             }
             return MediaDocument(
-                lastUpdate = root.getValue("lastUpdate").toString(),
+                lastUpdate = root.getValue("lastUpdate").jsonPrimitive.content,
                 entries = entries,
             )
         }

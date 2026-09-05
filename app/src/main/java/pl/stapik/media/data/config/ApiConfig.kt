@@ -1,6 +1,5 @@
 package pl.stapik.media.data.config
 
-/** Stapik Cloud connection details entered on the Connect screen. */
 data class ApiConfig(
     val serverUrl: String,
     val apiKey: String,

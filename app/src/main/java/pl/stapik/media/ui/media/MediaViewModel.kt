@@ -19,6 +19,9 @@ class MediaViewModel(
     private val _uiState = MutableStateFlow<MediaUiState>(MediaUiState.Loading)
     val uiState: StateFlow<MediaUiState> = _uiState.asStateFlow()
 
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
+
     private val _filters = MutableStateFlow(mapOf<MediaCategory, CategoryFilter>())
     val filters: StateFlow<Map<MediaCategory, CategoryFilter>> = _filters.asStateFlow()
 
@@ -26,9 +29,14 @@ class MediaViewModel(
         refresh()
     }
 
-    fun refresh() {
+    fun refresh(isPullToRefresh: Boolean = false) {
         viewModelScope.launch {
-            _uiState.value = MediaUiState.Loading
+            if (isPullToRefresh) {
+                _isRefreshing.value = true
+            } else {
+                _uiState.value = MediaUiState.Loading
+            }
+
             try {
                 val config = configStorage.load()
                 if (config == null) {
@@ -47,22 +55,21 @@ class MediaViewModel(
                         _uiState.value = MediaUiState.Error(outcome.message)
                 }
             } catch (e: Exception) {
-                // configStorage.load() / CryptoManager can throw (e.g. a Keystore
-                // key invalidated by a lock-screen change) - never let that leave
-                // the UI stuck on Loading forever.
                 _uiState.value = MediaUiState.Error(e.message ?: e::class.simpleName ?: "Unknown error")
+            } finally {
+                _isRefreshing.value = false
             }
         }
     }
 
     fun setYearFilter(category: MediaCategory, year: Int?) {
         val current = _filters.value[category] ?: CategoryFilter.None
-        _filters.value = _filters.value + (category to current.copy(year = year, month = null))
+        _filters.value += (category to current.copy(year = year, month = null))
     }
 
     fun setMonthFilter(category: MediaCategory, month: Int?) {
         val current = _filters.value[category] ?: CategoryFilter.None
-        _filters.value = _filters.value + (category to current.copy(month = month))
+        _filters.value += (category to current.copy(month = month))
     }
 }
 

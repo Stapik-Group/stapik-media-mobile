@@ -1,17 +1,22 @@
 package pl.stapik.media.ui.media
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -30,6 +35,7 @@ import java.time.Month
 import java.time.format.TextStyle
 import java.util.Locale
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CategoryPage(
     category: MediaCategory,
@@ -39,6 +45,7 @@ fun CategoryPage(
     modifier: Modifier = Modifier,
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val isRefreshing by viewModel.isRefreshing.collectAsState()
     val filters by viewModel.filters.collectAsState()
     val filter = filters[category] ?: CategoryFilter.None
 
@@ -67,32 +74,54 @@ fun CategoryPage(
             val entries = state.entries.filteredFor(category, filter)
             val years = state.entries.availableYearsFor(category)
 
-            LazyColumn(
+            PullToRefreshBox(
+                isRefreshing = isRefreshing,
+                onRefresh = { viewModel.refresh(isPullToRefresh = true) },
                 modifier = modifier.fillMaxSize(),
-                contentPadding = PaddingValues(12.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                item {
-                    FilterBar(
-                        years = years,
-                        selectedYear = filter.year,
-                        selectedMonth = filter.month,
-                        onYearSelected = { viewModel.setYearFilter(category, it) },
-                        onMonthSelected = { viewModel.setMonthFilter(category, it) },
-                        scheme = scheme,
-                    )
-                }
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    if (state.isStale) {
+                        item { StaleDataBanner(updatedAt = state.updatedAt, scheme = scheme) }
+                    }
 
-                if (entries.isEmpty()) {
-                    item { Text(text = stringResource(R.string.media_no_entries), color = scheme.textMuted) }
-                }
+                    item {
+                        FilterBar(
+                            years = years,
+                            selectedYear = filter.year,
+                            selectedMonth = filter.month,
+                            onYearSelected = { viewModel.setYearFilter(category, it) },
+                            onMonthSelected = { viewModel.setMonthFilter(category, it) },
+                            scheme = scheme,
+                        )
+                    }
 
-                items(entries, key = { it.title + it.consumed.year + it.consumed.month }) { entry ->
-                    EntryCard(entry = entry, scheme = scheme, onClick = { onEntryClick(entry) })
+                    if (entries.isEmpty()) {
+                        item { Text(text = stringResource(R.string.media_no_entries), color = scheme.textMuted) }
+                    }
+
+                    items(entries, key = { it.title + it.consumed.year + it.consumed.month }) { entry ->
+                        EntryCard(entry = entry, scheme = scheme, onClick = { onEntryClick(entry) })
+                    }
                 }
             }
         }
     }
+}
+
+@Composable
+private fun StaleDataBanner(updatedAt: String, scheme: RetroColorScheme) {
+    Text(
+        text = stringResource(R.string.media_stale_banner, formatUpdatedAt(updatedAt)),
+        color = scheme.textDark,
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(scheme.borderLight)
+            .padding(8.dp),
+    )
 }
 
 @Composable

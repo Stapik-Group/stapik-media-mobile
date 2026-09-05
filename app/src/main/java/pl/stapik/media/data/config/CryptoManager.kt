@@ -10,12 +10,6 @@ import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 
-/**
- * AES-GCM encryption backed by a key held in the Android Keystore, so the
- * server URL and API key are never written to disk in plaintext.
- * `setUnlockedDeviceRequired` is applied from API 30, matching the calendar
- * companion app's config storage.
- */
 class CryptoManager(
     private val keyAlias: String = "stapikmedia_config_key",
 ) {
@@ -41,7 +35,6 @@ class CryptoManager(
             .generateKey()
     }
 
-    /** Encrypts [plaintext], returning base64(iv) + ":" + base64(ciphertext). */
     fun encrypt(plaintext: String): String {
         val cipher = Cipher.getInstance(TRANSFORMATION).apply {
             init(Cipher.ENCRYPT_MODE, getOrCreateKey())
@@ -51,7 +44,6 @@ class CryptoManager(
         return "${b64(iv)}:${b64(ciphertext)}"
     }
 
-    /** Reverses [encrypt]. */
     fun decrypt(payload: String): String {
         val (ivPart, cipherPart) = payload.split(":", limit = 2)
         val cipher = Cipher.getInstance(TRANSFORMATION).apply {

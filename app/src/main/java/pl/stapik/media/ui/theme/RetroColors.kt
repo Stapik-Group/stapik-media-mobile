@@ -2,11 +2,6 @@ package pl.stapik.media.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-/**
- * Colors for one theme. Values are taken directly from stapik-media's
- * style-classic.css / style-modern.css / style-classic-pink.css so the
- * mobile companion stays visually in sync with the desktop app.
- */
 data class RetroColorScheme(
     val shape: ThemeShape,
     val windowBackground: Color,

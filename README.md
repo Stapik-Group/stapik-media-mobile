@@ -1,50 +1,31 @@
 # Stapik Media (Android)
 
-A read-only mobile companion to [Stapik Media](https://github.com/Stapik-Group/stapik-media),
-the desktop media tracker. Kotlin + Jetpack Compose, same retro aesthetic and
-Stapik Cloud sync.
+A read-only mobile companion to [Stapik Media](https://github.com/Stapik-Group/stapik-media), the desktop media consumption tracker. Written in Kotlin with Jetpack Compose, styled after the same retro old-school aesthetic as the desktop version and its sibling apps.
 
-## What this is
+## Features
 
-Categories (Movies, Series, Cartoons, Books, Albums, Games) are side screens,
-swiped between via a `HorizontalPager` — the same idea as swiping between
-weekdays in the planner companion, applied to categories instead of days.
-Each category screen is a plain infinite-scroll list, filterable by
-consumption year and, once a year is picked, month.
+- **Category side screens** – swipe horizontally between six categories (Movies, Series, Cartoons, Books, Albums, Games), with left/right arrows on the tab bar as a swipe-more affordance
+- **Entry details** – tap an entry to open its full details (director/author/performer/studio, genre, release date, platform, audiobook flag where relevant); system back or an edge swipe returns to the list
+- **Year/month filtering** – narrow each category down to a consumption year, and optionally a specific month within it
+- **Cloud sync (read-only)** – fetches the media log from the Stapik Cloud compatible self-hosted API
+- **Offline cache** – automatically caches the last retrieved list, with a banner showing when you're looking at cached data and from when
+- **Pull-to-refresh** – drag down to fetch the latest data on demand without losing scroll position
+- **Themes** – Classic, Modern and Classic Pink, matching the desktop app, applied consistently across every screen
+- **Encrypted connection config** – server URL and API key are encrypted with a key held in the Android Keystore before being stored on device; the API key is masked on screen with a show/hide toggle
+- **Multilingual UI** – Polish, English and German, following the phone's system language
+- **Retro aesthetic** – same raised-button, blue-navbar, grey-cell look as the desktop app
 
-Read-only, same as the other two companions: no add/edit/delete, no
-notifications, no home screen widget.
+This app does not add, edit, or delete entries – all of that happens in the desktop app. It only reads and displays whatever is currently in the cloud.
 
-## Status: initial scaffold, not yet built/run
+### What's intentionally not here
 
-This is a first pass generated from the desktop app's actual source
-(`src/core/model`, `MediaEntrySerializer.cpp`, `Storage.cpp`, and the three
-`style-*.css` files on `main`), not from scratch — but it has **not been
-compiled or run** in an actual Android environment yet. Known gaps before
-this is real:
-
-- [ ] Build and run in Android Studio, fix whatever doesn't compile
-  (dependency versions in `app/build.gradle.kts` are current as of
-  this writing but unverified against each other)
-- [ ] `RetroBevel.kt`'s Classic bevel border is a simplified placeholder
-  (same border weight on all sides) — the desktop's raised-bevel look
-  is asymmetric (light top/left, dark bottom/right); needs a proper
-  `drawBehind`/`Canvas` implementation, ideally ported from whatever
-  stapikcalendar-android's `retroBevel` actually does under the hood
-- [ ] No offline-cache "stale data" banner yet (calendar's Etap B has one;
-  `MediaUiState.Success.isStale` is already plumbed through, just not
-  surfaced in the UI)
-- [ ] No pull-to-refresh
-- [ ] Theme switching UI (Settings menu) not built — `AppTheme.CLASSIC` is
-  hardcoded in `MainActivity`; no persistence of the user's choice
-- [ ] Gradle wrapper files (`gradlew`, `gradle/wrapper/*`) not included —
-  generate with `gradle wrapper` once opened in Android Studio
-- [ ] Launcher icon is a placeholder reference (`@mipmap/ic_launcher`) —
-  no actual icon asset included
-- [ ] No automated tests
+Like other companion apps, this app has **no notifications** and **no home screen widget** — a deliberate scope decision for the media companion.
 
 ## Requirements
 
 - Android 8.0 (API 26) or newer
-- A running [Stapik Cloud](https://github.com/Stapik-Group/stapik-cloud)
-  instance, same one stapik-media itself syncs to
+- A running instance of the Stapik Cloud compatible sync API used by the desktop app (see [Stapik Media](https://github.com/Stapik-Group/stapik-media))
+
+## Building
+
+Requires [Android Studio](https://developer.android.com/studio) (Kotlin, Jetpack Compose).

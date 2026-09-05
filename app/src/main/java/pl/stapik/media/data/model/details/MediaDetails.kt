@@ -1,11 +1,5 @@
 package pl.stapik.media.data.model.details
 
-/**
- * Mirrors the C++ `MediaDetails` = std::variant<ScreenDetails, BookDetails,
- * AlbumDetails, GameDetails>. Which subtype is valid for a given entry is
- * determined by its MediaCategory (Movie/Series/Cartoon -> Screen, Book ->
- * Book, Album -> Album, Game -> Game) - see MediaEntrySerializer.
- */
 sealed interface MediaDetails {
 
     data class Screen(

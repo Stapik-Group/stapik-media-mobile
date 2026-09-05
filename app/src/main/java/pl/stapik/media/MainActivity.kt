@@ -11,13 +11,14 @@ import pl.stapik.media.data.config.DataStoreApiConfigStorage
 import pl.stapik.media.data.repository.MediaRepository
 import pl.stapik.media.ui.media.MediaViewModel
 import pl.stapik.media.ui.root.AppRoot
-import pl.stapik.media.ui.theme.AppTheme
+import pl.stapik.media.ui.theme.DataStoreThemePreferenceStorage
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         val configStorage = DataStoreApiConfigStorage(applicationContext)
+        val themeStorage = DataStoreThemePreferenceStorage(applicationContext)
         val cacheStorage = DataStoreMediaCacheStorage(applicationContext)
         val repository = MediaRepository(cacheStorage)
 
@@ -34,8 +35,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             AppRoot(
                 configStorage = configStorage,
+                themeStorage = themeStorage,
                 viewModel = viewModel,
-                theme = AppTheme.CLASSIC, // TODO: persist user's theme choice, mirroring desktop's Settings -> Theme
             )
         }
     }

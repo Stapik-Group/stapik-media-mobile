@@ -13,11 +13,6 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 
-/**
- * Unencrypted, on-device cache of the last successfully fetched entry list -
- * mirrors CalendarCacheStorage/DataStoreCalendarCacheStorage. Never synced,
- * only used so the app has something to show offline.
- */
 interface MediaCacheStorage {
     suspend fun load(): CachedMedia?
     suspend fun save(cached: CachedMedia)
