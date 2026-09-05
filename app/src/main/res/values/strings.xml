@@ -63,4 +63,6 @@
     <string name="error_not_found">Media log not found on the server. Check your connection settings.</string>
     <string name="error_cannot_verify">No response from the server - could not verify these credentials.</string>
     <string name="error_unknown">Something went wrong: %1$s</string>
+
+    <string name="retry">Retry</string>
 </resources>

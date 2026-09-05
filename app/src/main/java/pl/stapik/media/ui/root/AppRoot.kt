@@ -113,6 +113,7 @@ fun AppRoot(
                     is AppScreen.Media -> MediaPagerScreen(
                         viewModel = viewModel,
                         scheme = scheme,
+                        onNavigateToConnect = { screen = AppScreen.Connect },
                         modifier = Modifier.fillMaxSize(),
                     )
 

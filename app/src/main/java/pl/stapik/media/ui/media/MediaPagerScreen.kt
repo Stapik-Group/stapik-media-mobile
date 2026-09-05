@@ -34,6 +34,7 @@ import pl.stapik.media.ui.theme.RetroColorScheme
 fun MediaPagerScreen(
     viewModel: MediaViewModel,
     scheme: RetroColorScheme,
+    onNavigateToConnect: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val categories = MediaCategory.entries
@@ -94,6 +95,7 @@ fun MediaPagerScreen(
                     viewModel = viewModel,
                     scheme = scheme,
                     onEntryClick = { detailEntry = it },
+                    onNavigateToConnect = onNavigateToConnect,
                     modifier = Modifier.fillMaxSize(),
                 )
             }

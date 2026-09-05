@@ -63,4 +63,6 @@
     <string name="error_not_found">Medienprotokoll wurde auf dem Server nicht gefunden. Überprüfe die Verbindungseinstellungen.</string>
     <string name="error_cannot_verify">Keine Antwort vom Server - diese Zugangsdaten konnten nicht überprüft werden.</string>
     <string name="error_unknown">Etwas ist schiefgelaufen: %1$s</string>
+
+    <string name="retry">Erneut versuchen</string>
 </resources>

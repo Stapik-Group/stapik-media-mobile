@@ -63,4 +63,6 @@
     <string name="error_not_found">Nie znaleziono dziennika mediów na serwerze. Sprawdź ustawienia połączenia.</string>
     <string name="error_cannot_verify">Brak odpowiedzi z serwera - nie udało się zweryfikować tych danych.</string>
     <string name="error_unknown">Coś poszło nie tak: %1$s</string>
+
+    <string name="retry">Spróbuj ponownie</string>
 </resources>

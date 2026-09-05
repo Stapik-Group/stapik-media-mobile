@@ -3,13 +3,17 @@ package pl.stapik.media.ui.media
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -42,6 +46,7 @@ fun CategoryPage(
     viewModel: MediaViewModel,
     scheme: RetroColorScheme,
     onEntryClick: (MediaEntry) -> Unit,
+    onNavigateToConnect: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -54,21 +59,21 @@ fun CategoryPage(
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
         }
 
-        is MediaUiState.NotConnected -> Box(modifier.fillMaxSize()) {
-            Text(
-                text = stringResource(R.string.media_error_not_connected),
-                color = scheme.textDark,
-                modifier = Modifier.align(Alignment.Center),
-            )
-        }
+        is MediaUiState.NotConnected -> CenteredMessageWithAction(
+            message = stringResource(R.string.media_error_not_connected),
+            actionLabel = stringResource(R.string.menu_connect),
+            onAction = onNavigateToConnect,
+            scheme = scheme,
+            modifier = modifier,
+        )
 
-        is MediaUiState.Error -> Box(modifier.fillMaxSize()) {
-            Text(
-                text = state.error.toDisplayMessage(),
-                color = scheme.textDark,
-                modifier = Modifier.align(Alignment.Center),
-            )
-        }
+        is MediaUiState.Error -> CenteredMessageWithAction(
+            message = state.error.toDisplayMessage(),
+            actionLabel = stringResource(R.string.retry),
+            onAction = { viewModel.refresh() },
+            scheme = scheme,
+            modifier = modifier,
+        )
 
         is MediaUiState.Success -> {
             val entries = state.entries.filteredFor(category, filter)
@@ -185,6 +190,25 @@ private fun MonthDropdown(
             )
             (1..12).forEach { month ->
                 DropdownMenuItem(text = { Text(monthLabel(month)) }, onClick = { onMonthSelected(month); expanded = false })
+            }
+        }
+    }
+}
+
+@Composable
+private fun CenteredMessageWithAction(
+    message: String,
+    actionLabel: String,
+    onAction: () -> Unit,
+    scheme: RetroColorScheme,
+    modifier: Modifier = Modifier,
+) {
+    Box(modifier = modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(message, color = scheme.textDark)
+            Spacer(modifier = Modifier.height(12.dp))
+            Button(onClick = onAction) {
+                Text(actionLabel)
             }
         }
     }
