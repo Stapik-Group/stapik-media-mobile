@@ -3,7 +3,7 @@ package pl.stapik.media.ui.media
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import pl.stapik.media.R
-import pl.stapik.media.data.repository.MediaHttpException
+import retrofit2.HttpException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 
@@ -17,10 +17,10 @@ sealed interface MediaLoadError {
 
 fun Throwable.toMediaLoadError(): MediaLoadError = when (this) {
     is UnknownHostException, is SocketTimeoutException -> MediaLoadError.NoNetwork
-    is MediaHttpException -> when (code) {
+    is HttpException -> when (code()) {
         401, 403 -> MediaLoadError.Unauthorized
         404 -> MediaLoadError.NotFound
-        else -> MediaLoadError.Unknown(message ?: "HTTP $code")
+        else -> MediaLoadError.Unknown(message())
     }
     else -> MediaLoadError.Unknown(message ?: this::class.simpleName ?: "Unknown error")
 }
