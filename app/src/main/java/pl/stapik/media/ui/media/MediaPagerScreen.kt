@@ -63,7 +63,7 @@ fun MediaPagerScreen(
                         horizontalArrangement = Arrangement.spacedBy(2.dp),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(Brush.horizontalGradient(listOf(scheme.headerGradientStart, scheme.headerGradientEnd)))
+                            .background(scheme.windowBackground)
                             .horizontalScroll(rememberScrollState())
                             .padding(4.dp),
                     ) {

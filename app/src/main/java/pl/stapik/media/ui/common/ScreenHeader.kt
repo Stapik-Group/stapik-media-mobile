@@ -42,7 +42,7 @@ fun ScreenHeader(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             modifier = modifier
                 .fillMaxWidth()
-                .background(Brush.horizontalGradient(listOf(scheme.headerGradientStart, scheme.headerGradientEnd)))
+                .background(scheme.windowBackground)
                 .retroBevel(scheme, raised = true)
                 .padding(horizontal = 12.dp, vertical = 10.dp),
         ) {
@@ -64,7 +64,7 @@ fun ScreenHeader(
 
             Text(
                 text = title,
-                color = scheme.textOnHeader,
+                color = scheme.textDark,
                 fontWeight = FontWeight.Bold,
                 style = MaterialTheme.typography.titleMedium,
             )

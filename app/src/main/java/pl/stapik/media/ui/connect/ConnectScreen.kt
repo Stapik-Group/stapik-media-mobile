@@ -55,7 +55,7 @@ fun ConnectScreen(
     Column(modifier = modifier.fillMaxSize()) {
         ScreenHeader(title = stringResource(R.string.connect_title), scheme = scheme, onBack = onBack)
 
-        Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)) {
             RetroTextField(
                 value = serverUrl,
                 onValueChange = { serverUrl = it },
