@@ -1,20 +1,19 @@
 package pl.stapik.media.data.model
 
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import pl.stapik.media.data.serialization.LocalDateSerializer
 import java.time.LocalDate
 
-enum class DatePrecision(val wireName: String) {
-    DAY("day"),
-    MONTH("month"),
-    YEAR("year");
-
-    companion object {
-        fun fromWireName(name: String): DatePrecision =
-            entries.firstOrNull { it.wireName == name }
-                ?: throw IllegalArgumentException("Unknown precision string: $name")
-    }
+@Serializable
+enum class DatePrecision {
+    @SerialName("day") DAY,
+    @SerialName("month") MONTH,
+    @SerialName("year") YEAR,
 }
 
+@Serializable
 data class ReleaseDate(
-    val date: LocalDate,
+    @Serializable(with = LocalDateSerializer::class) val date: LocalDate,
     val precision: DatePrecision,
 )

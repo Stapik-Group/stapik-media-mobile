@@ -1,16 +1,14 @@
 package pl.stapik.media.data.model
 
-enum class MediaCategory(val wireName: String) {
-    MOVIE("movie"),
-    SERIES("series"),
-    CARTOON("cartoon"),
-    BOOK("book"),
-    ALBUM("album"),
-    GAME("game");
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
-    companion object {
-        fun fromWireName(name: String): MediaCategory =
-            entries.firstOrNull { it.wireName == name }
-                ?: throw IllegalArgumentException("Unknown category string: $name")
-    }
+@Serializable
+enum class MediaCategory {
+    @SerialName("movie") MOVIE,
+    @SerialName("series") SERIES,
+    @SerialName("cartoon") CARTOON,
+    @SerialName("book") BOOK,
+    @SerialName("album") ALBUM,
+    @SerialName("game") GAME,
 }

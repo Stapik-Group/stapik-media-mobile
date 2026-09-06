@@ -7,12 +7,8 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import pl.stapik.media.data.model.MediaEntry
 import pl.stapik.media.data.serialization.MediaDocument
-import pl.stapik.media.data.serialization.MediaEntrySerializer
 import kotlinx.coroutines.flow.first
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonObject
 
 interface MediaCacheStorage {
     suspend fun load(): CachedMedia?
@@ -38,9 +34,10 @@ class DataStoreMediaCacheStorage(private val context: Context) : MediaCacheStora
         val entriesJson = prefs[Keys.ENTRIES] ?: return null
         val updatedAt = prefs[Keys.UPDATED_AT] ?: return null
 
+        // A corrupted or pre-migration cache should not crash the app,
+        // just act as no cache (same contract as PlannerCacheStorage).
         return runCatching {
-            val array = Json.parseToJsonElement(entriesJson).jsonArray
-            val entries = array.map { MediaEntrySerializer.fromJson(it.jsonObject) }
+            val entries = Json.decodeFromString<List<MediaEntry>>(entriesJson)
             CachedMedia(entries, updatedAt)
         }.getOrElse { error ->
             Log.w(TAG, "Failed to decode cached media entries", error)
@@ -49,9 +46,9 @@ class DataStoreMediaCacheStorage(private val context: Context) : MediaCacheStora
     }
 
     override suspend fun save(cached: CachedMedia) {
-        val array = JsonArray(cached.entries.map { MediaEntrySerializer.toJson(it) })
+        val entriesJson = Json.encodeToString(cached.entries)
         context.mediaCacheDataStore.edit { prefs ->
-            prefs[Keys.ENTRIES] = array.toString()
+            prefs[Keys.ENTRIES] = entriesJson
             prefs[Keys.UPDATED_AT] = cached.updatedAt
         }
     }
@@ -60,4 +57,5 @@ class DataStoreMediaCacheStorage(private val context: Context) : MediaCacheStora
         const val TAG = "DataStoreMediaCacheStorage"
     }
 }
+
 fun MediaDocument.toCached() = CachedMedia(entries = entries, updatedAt = lastUpdate)
