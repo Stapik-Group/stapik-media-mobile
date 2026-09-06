@@ -1,10 +1,13 @@
 package pl.stapik.media.data.config
 
 import android.content.Context
+import android.util.Log
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.first
+import java.security.GeneralSecurityException
+import javax.crypto.AEADBadTagException
 
 interface ApiConfigStorage {
     suspend fun load(): ApiConfig?
@@ -34,8 +37,11 @@ class DataStoreApiConfigStorage(
                 serverUrl = crypto.decrypt(serverUrlEnc),
                 apiKey = crypto.decrypt(apiKeyEnc),
             )
-        } catch (_: Exception) {
-            clear()
+        } catch (e: GeneralSecurityException) {
+            Log.w(TAG, "Failed to decrypt API config", e)
+            null
+        } catch (e: AEADBadTagException) {
+            Log.w(TAG, "Failed to decrypt API config", e)
             null
         }
     }
@@ -49,5 +55,9 @@ class DataStoreApiConfigStorage(
 
     override suspend fun clear() {
         context.configDataStore.edit { it.clear() }
+    }
+
+    private companion object {
+        const val TAG = "DataStoreApiConfigStorage"
     }
 }
