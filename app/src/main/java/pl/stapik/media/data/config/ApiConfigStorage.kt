@@ -2,12 +2,26 @@ package pl.stapik.media.data.config
 
 import android.content.Context
 import android.util.Log
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import java.io.File
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
-import java.security.GeneralSecurityException
-import javax.crypto.AEADBadTagException
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
+import pl.stapik.common.cloud.CloudConfig
+import pl.stapik.common.crypto.KeystoreCiphers
+import pl.stapik.common.crypto.KeystoreKeys
+import pl.stapik.common.settings.AesGcmLegacyDecryptor
+import pl.stapik.common.settings.ConfigLoad
+import pl.stapik.common.settings.ConnectionConfigStore
+import pl.stapik.common.settings.LegacyFormat
+import pl.stapik.common.settings.LegacyPrefsConfigReader
+import pl.stapik.common.settings.LegacyPrefsSource
 
 interface ApiConfigStorage {
     suspend fun load(): ApiConfig?
@@ -15,49 +29,68 @@ interface ApiConfigStorage {
     suspend fun clear()
 }
 
+/** The DataStore of the pre-library versions; now only read once, to migrate the connection. */
 private val Context.configDataStore by preferencesDataStore(name = "connection_config")
 
-class DataStoreApiConfigStorage(
-    private val context: Context,
-    private val crypto: CryptoManager = CryptoManager(),
-) : ApiConfigStorage {
-
-    private object Keys {
-        val SERVER_URL = stringPreferencesKey("server_url_enc")
-        val API_KEY = stringPreferencesKey("api_key_enc")
+private class DataStoreLegacySource(private val dataStore: DataStore<Preferences>) : LegacyPrefsSource {
+    override fun readAll(): Map<String, String> = runBlocking {
+        dataStore.data.first().asMap().entries
+            .mapNotNull { (key, value) -> (value as? String)?.let { key.name to it } }
+            .toMap()
     }
 
-    override suspend fun load(): ApiConfig? {
-        val prefs = context.configDataStore.data.first()
-        val serverUrlEnc = prefs[Keys.SERVER_URL] ?: return null
-        val apiKeyEnc = prefs[Keys.API_KEY] ?: return null
+    override fun clear() = runBlocking { dataStore.edit { it.clear() }; Unit }
+}
 
-        return try {
-            ApiConfig(
-                serverUrl = crypto.decrypt(serverUrlEnc),
-                apiKey = crypto.decrypt(apiKeyEnc),
-            )
-        } catch (e: GeneralSecurityException) {
-            Log.w(TAG, "Failed to decrypt API config", e)
-            null
-        } catch (e: AEADBadTagException) {
-            Log.w(TAG, "Failed to decrypt API config", e)
-            null
+/**
+ * Connection settings in the library's encrypted file. The first [load] without that file migrates
+ * the configuration saved by earlier versions, so the user does not connect again.
+ */
+class ConnectionApiConfigStorage(context: Context) : ApiConfigStorage {
+    /** Shared with the connect form's controller, so that both work on the same file. */
+    val store = ConnectionConfigStore(
+        directory = File(context.applicationContext.filesDir, "stapik").toPath(),
+        cipher = KeystoreCiphers.create(KEY_ALIAS),
+        schemaVersion = SCHEMA_VERSION,
+        legacy = LegacyPrefsConfigReader(
+            source = DataStoreLegacySource(context.applicationContext.configDataStore),
+            format = LegacyFormat.MEDIA_BUDGETING,
+            decryptor = AesGcmLegacyDecryptor { KeystoreKeys.find(LEGACY_KEY_ALIAS) },
+        ),
+    )
+
+    // ConnectionConfigStore is not thread-safe, and the view model and the root both load at start.
+    private val lock = Mutex()
+
+    override suspend fun load(): ApiConfig? = lock.withLock {
+        withContext(Dispatchers.IO) {
+            when (val result = store.load()) {
+                is ConfigLoad.Loaded -> ApiConfig(result.config.normalizedApiUrl, result.config.apiKey, result.config.passphrase)
+                ConfigLoad.None -> null
+                else -> {
+                    Log.w(TAG, "Saved connection is not usable: ${result::class.simpleName}")
+                    null
+                }
+            }
         }
     }
 
     override suspend fun save(config: ApiConfig) {
-        context.configDataStore.edit { prefs ->
-            prefs[Keys.SERVER_URL] = crypto.encrypt(config.serverUrl)
-            prefs[Keys.API_KEY] = crypto.encrypt(config.apiKey)
+        lock.withLock {
+            withContext(Dispatchers.IO) { store.save(CloudConfig(config.serverUrl, config.apiKey, config.passphrase)) }
         }
     }
 
     override suspend fun clear() {
-        context.configDataStore.edit { it.clear() }
+        lock.withLock {
+            withContext(Dispatchers.IO) { store.clear() }
+        }
     }
 
     private companion object {
-        const val TAG = "DataStoreApiConfigStorage"
+        const val TAG = "ConnectionApiConfigStorage"
+        const val SCHEMA_VERSION = 1
+        const val KEY_ALIAS = "stapikmedia_connection_key"
+        const val LEGACY_KEY_ALIAS = "stapikmedia_config_key"
     }
 }

@@ -8,7 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.CreationExtras
 import pl.stapik.media.data.cache.DataStoreMediaCacheStorage
-import pl.stapik.media.data.config.DataStoreApiConfigStorage
+import pl.stapik.media.data.config.ConnectionApiConfigStorage
 import pl.stapik.media.data.repository.MediaRepository
 import pl.stapik.media.ui.media.MediaViewModel
 import pl.stapik.media.ui.root.AppRoot
@@ -19,7 +19,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        val configStorage = DataStoreApiConfigStorage(applicationContext)
+        val configStorage = ConnectionApiConfigStorage(applicationContext)
         val themeStorage = DataStoreThemePreferenceStorage(applicationContext)
         val cacheStorage = DataStoreMediaCacheStorage(applicationContext)
         val repository = MediaRepository(cacheStorage)
