@@ -10,8 +10,9 @@ A read-only mobile companion to [Stapik Media](https://github.com/Stapik-Group/s
 - **Cloud sync (read-only)** – fetches the media log from the Stapik Cloud compatible self-hosted API
 - **Offline cache** – automatically caches the last retrieved list, with a banner showing when you're looking at cached data and from when
 - **Pull-to-refresh** – drag down to fetch the latest data on demand without losing scroll position
-- **Themes** – Classic, Modern and Classic Pink, matching the desktop app, applied consistently across every screen
+- **Themes** – Classic, Classic Pink, Modern, Dark and Neoclassic, matching the desktop app, applied consistently across every screen
 - **Encrypted connection config** – server URL and API key are encrypted with a key held in the Android Keystore before being stored on device; the API key is masked on screen with a show/hide toggle
+- **End-to-end encryption** – an optional passphrase reads cloud data that the desktop app encrypted (`stapik-e2e`)
 - **Multilingual UI** – Polish, English and German, following the phone's system language
 - **Retro aesthetic** – same raised-button, blue-navbar, grey-cell look as the desktop app
 
@@ -29,3 +30,15 @@ Like other companion apps, this app has **no notifications** and **no home scree
 ## Building
 
 Requires [Android Studio](https://developer.android.com/studio) (Kotlin, Jetpack Compose).
+
+The app uses the shared library [stapik-common-mobile](https://github.com/Stapik-Group/stapik-common-mobile) as a git submodule in `libs/stapik-common-mobile`, pinned to a release tag. Clone with `git clone --recurse-submodules`, or run `git submodule update --init` after a plain clone.
+
+The library is built together with the app, so it needs the Android SDK location too: either set `ANDROID_HOME`, or copy `local.properties` into `libs/stapik-common-mobile/`.
+
+To work on the library next to the app, put its path in `~/.gradle/gradle.properties`:
+
+```
+stapikCommonMobileDir=/path/to/stapik-common-mobile
+```
+
+Build a debug APK with `./gradlew :app:assembleDebug`. Pull requests from `develop` to `master` are built and tested by GitHub Actions; a `v*` tag builds a signed release APK (secrets `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD`).

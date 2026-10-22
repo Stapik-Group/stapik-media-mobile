@@ -1,0 +1,3 @@
+[submodule "libs/stapik-common-mobile"]
+	path = libs/stapik-common-mobile
+	url = https://github.com/Stapik-Group/stapik-common-mobile.git

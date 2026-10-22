@@ -1,5 +1,5 @@
 [versions]
-agp = "9.3.2"
+agp = "9.4.1"
 coreKtx = "1.19.0"
 junit = "4.13.2"
 junitVersion = "1.3.0"
@@ -12,14 +12,19 @@ kotlin = "2.4.0"
 composeBom = "2026.06.00"
 lifecycleCompose = "2.9.4"
 datastore = "1.2.1"
-retrofit = "2.11.0"
-okhttp = "4.12.0"
 kotlinx-serialization = "1.11.0"
-retrofitKotlinxSerializationConverter = "1.0.0"
 foundation = "1.12.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+core-cloud = { module = "pl.stapik.common:core-cloud" }
+core-crypto = { module = "pl.stapik.common:core-crypto" }
+core-i18n = { module = "pl.stapik.common:core-i18n" }
+core-model = { module = "pl.stapik.common:core-model" }
+core-presentation = { module = "pl.stapik.common:core-presentation" }
+core-settings = { module = "pl.stapik.common:core-settings" }
+core-sync = { module = "pl.stapik.common:core-sync" }
+core-theme = { module = "pl.stapik.common:core-theme" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -39,12 +44,10 @@ androidx-compose-material3 = { group = "androidx.compose.material3", name = "mat
 lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycleCompose" }
 lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycleCompose" }
 datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
-retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
-okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
-okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
-retrofit-kotlinx-serialization-converter = { group = "com.jakewharton.retrofit", name = "retrofit2-kotlinx-serialization-converter", version.ref = "retrofitKotlinxSerializationConverter" }
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
+ui-shell = { module = "pl.stapik.common:ui-shell" }
+ui-theme = { module = "pl.stapik.common:ui-theme" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

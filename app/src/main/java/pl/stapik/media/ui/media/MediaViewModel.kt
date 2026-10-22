@@ -2,7 +2,6 @@ package pl.stapik.media.ui.media
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import pl.stapik.media.data.config.ApiConfig
 import pl.stapik.media.data.config.ApiConfigStorage
 import pl.stapik.media.data.model.MediaCategory
 import pl.stapik.media.data.repository.MediaFetchOutcome
@@ -52,13 +51,6 @@ class MediaViewModel(
                 _isRefreshing.value = false
             }
         }
-    }
-
-    suspend fun refreshWithConfig(config: ApiConfig): MediaFetchOutcome {
-        _uiState.value = MediaUiState.Loading
-        val outcome = repository.fetchEntries(config)
-        applyOutcome(outcome)
-        return outcome
     }
 
     private fun applyOutcome(outcome: MediaFetchOutcome) {

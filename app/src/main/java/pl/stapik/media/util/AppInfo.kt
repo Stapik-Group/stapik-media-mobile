@@ -1,5 +1,7 @@
 package pl.stapik.media.util
 
+import pl.stapik.media.BuildConfig
+
 object AppInfo {
-    const val VERSION_NAME = "1.0.0"
+    val VERSION_NAME: String = BuildConfig.VERSION_NAME
 }

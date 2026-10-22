@@ -30,7 +30,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
@@ -88,11 +87,9 @@ fun MediaPagerScreen(
 
                     ThemeShape.FLAT -> ScrollableTabRow(
                         selectedTabIndex = pagerState.currentPage,
-                        containerColor = scheme.headerGradientStart,
-                        contentColor = scheme.textOnHeader,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(Brush.horizontalGradient(listOf(scheme.headerGradientStart, scheme.headerGradientEnd))),
+                        containerColor = scheme.windowBackground,
+                        contentColor = scheme.textDark,
+                        modifier = Modifier.fillMaxWidth(),
                     ) {
                         categories.forEachIndexed { index, category ->
                             Tab(
@@ -111,7 +108,7 @@ fun MediaPagerScreen(
                         onClick = { scope.launch { pagerState.animateScrollToPage(pagerState.currentPage - 1) } },
                         modifier = Modifier.align(Alignment.CenterStart),
                     ) {
-                        Icon(Icons.Filled.KeyboardArrowLeft, contentDescription = null, tint = scheme.textOnHeader)
+                        Icon(Icons.Filled.KeyboardArrowLeft, contentDescription = null, tint = scheme.textDark)
                     }
                 }
                 if (pagerState.currentPage < categories.lastIndex) {
@@ -119,7 +116,7 @@ fun MediaPagerScreen(
                         onClick = { scope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) } },
                         modifier = Modifier.align(Alignment.CenterEnd),
                     ) {
-                        Icon(Icons.Filled.KeyboardArrowRight, contentDescription = null, tint = scheme.textOnHeader)
+                        Icon(Icons.Filled.KeyboardArrowRight, contentDescription = null, tint = scheme.textDark)
                     }
                 }
             }

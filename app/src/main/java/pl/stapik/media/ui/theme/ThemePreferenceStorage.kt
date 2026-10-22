@@ -5,10 +5,11 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.first
+import pl.stapik.common.theme.ThemeId
 
 interface ThemePreferenceStorage {
-    suspend fun load(): AppTheme
-    suspend fun save(theme: AppTheme)
+    suspend fun load(): ThemeId
+    suspend fun save(theme: ThemeId)
 }
 
 private val Context.themeDataStore by preferencesDataStore(name = "theme_preference")
@@ -17,12 +18,13 @@ class DataStoreThemePreferenceStorage(private val context: Context) : ThemePrefe
 
     private val key = stringPreferencesKey("selected_theme")
 
-    override suspend fun load(): AppTheme {
+    override suspend fun load(): ThemeId {
         val stored = context.themeDataStore.data.first()[key]
-        return AppTheme.entries.firstOrNull { it.name == stored } ?: AppTheme.CLASSIC
+        // Earlier versions stored the enum name (CLASSIC_PINK); the shared id is "classic-pink".
+        return ThemeId.fromId(stored?.lowercase()?.replace('_', '-'), default = ThemeId.CLASSIC)
     }
 
-    override suspend fun save(theme: AppTheme) {
-        context.themeDataStore.edit { it[key] = theme.name }
+    override suspend fun save(theme: ThemeId) {
+        context.themeDataStore.edit { it[key] = theme.id }
     }
 }
