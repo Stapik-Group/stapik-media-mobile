@@ -24,11 +24,26 @@ android {
         }
     }
 
+    // Release signing comes from the environment (the release workflow sets these); without it the
+    // release build stays unsigned, so a local build needs no keystore.
+    signingConfigs {
+        val keystoreFile = System.getenv("KEYSTORE_FILE")
+        if (!keystoreFile.isNullOrEmpty()) {
+            create("release") {
+                storeFile = file(keystoreFile)
+                storePassword = System.getenv("KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("KEY_ALIAS")
+                keyPassword = System.getenv("KEY_PASSWORD")
+            }
+        }
+    }
+
     buildTypes {
         release {
             optimization {
                 enable = false
             }
+            signingConfig = signingConfigs.findByName("release")
         }
     }
     compileOptions {

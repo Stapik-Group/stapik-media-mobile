@@ -1,0 +1,19 @@
+# A tag v* builds, signs and attaches the APK.
+# Secrets of this repository: KEYSTORE_BASE64, KEYSTORE_PASSWORD, KEY_ALIAS, KEY_PASSWORD.
+name: Release APK
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    # Keep @v... equal to the tag of stapik-common-mobile that the submodule is on.
+    uses: Stapik-Group/stapik-common-mobile/.github/workflows/release-apk.yml@v0.1.0
+    with:
+      apk-name: StapikMediaMobile
+    secrets: inherit
