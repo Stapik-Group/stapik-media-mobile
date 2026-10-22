@@ -14,8 +14,8 @@ android {
         applicationId = "pl.stapik.media"
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 2
+        versionName = "1.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -63,6 +63,16 @@ dependencies {
     implementation(libs.okhttp.logging)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.retrofit.kotlinx.serialization.converter)
+    implementation(libs.core.cloud)
+    implementation(libs.core.crypto)
+    implementation(libs.core.i18n)
+    implementation(libs.core.model)
+    implementation(libs.core.presentation)
+    implementation(libs.core.settings)
+    implementation(libs.core.sync)
+    implementation(libs.core.theme)
+    implementation(libs.ui.shell)
+    implementation(libs.ui.theme)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
