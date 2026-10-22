@@ -13,6 +13,7 @@ import pl.stapik.media.data.repository.MediaRepository
 import pl.stapik.media.ui.media.MediaViewModel
 import pl.stapik.media.ui.root.AppRoot
 import pl.stapik.media.ui.theme.DataStoreThemePreferenceStorage
+import pl.stapik.common.cloud.OkHttpTransport
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -22,7 +23,8 @@ class MainActivity : ComponentActivity() {
         val configStorage = ConnectionApiConfigStorage(applicationContext)
         val themeStorage = DataStoreThemePreferenceStorage(applicationContext)
         val cacheStorage = DataStoreMediaCacheStorage(applicationContext)
-        val repository = MediaRepository(cacheStorage)
+        val transport = OkHttpTransport()
+        val repository = MediaRepository(cacheStorage, transport)
 
         val viewModel = ViewModelProvider(
             this,
