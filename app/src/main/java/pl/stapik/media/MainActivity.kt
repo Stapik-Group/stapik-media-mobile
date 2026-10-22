@@ -13,7 +13,9 @@ import pl.stapik.media.data.repository.MediaRepository
 import pl.stapik.media.ui.media.MediaViewModel
 import pl.stapik.media.ui.root.AppRoot
 import pl.stapik.media.ui.theme.DataStoreThemePreferenceStorage
+import pl.stapik.common.cloud.HttpCloudGateway
 import pl.stapik.common.cloud.OkHttpTransport
+import pl.stapik.common.presentation.ConnectController
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,6 +43,9 @@ class MainActivity : ComponentActivity() {
                 configStorage = configStorage,
                 themeStorage = themeStorage,
                 viewModel = viewModel,
+                newConnectController = { initial ->
+                    ConnectController(configStorage.store, { config -> HttpCloudGateway(config, transport) }, initial)
+                },
             )
         }
     }

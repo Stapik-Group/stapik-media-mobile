@@ -61,7 +61,7 @@ fun CategoryPage(
 
         is MediaUiState.NotConnected -> CenteredMessageWithAction(
             message = stringResource(R.string.media_error_not_connected),
-            actionLabel = stringResource(R.string.menu_connect),
+            actionLabel = stringResource(R.string.media_action_connect),
             onAction = onNavigateToConnect,
             scheme = scheme,
             modifier = modifier,

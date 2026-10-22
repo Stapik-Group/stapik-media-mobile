@@ -1,15 +1,6 @@
 <resources>
     <string name="app_name">Stapik Media Mobile</string>
 
-    <string name="connect_title">Mit Stapik Cloud verbinden</string>
-    <string name="connect_server_url_label">Server-URL</string>
-    <string name="connect_api_key_label">API-Schlüssel</string>
-    <string name="connect_save_button">Speichern &amp; verbinden</string>
-    <string name="connect_testing">Verbindung wird hergestellt…</string>
-    <string name="connect_error_prefix">Verbindung fehlgeschlagen: %1$s</string>
-    <string name="connect_stale_warning">Gespeichert, aber der Server war nicht erreichbar — zeige zwischengespeicherte Daten.</string>
-    <string name="connect_show_api_key">Anzeigen</string>
-    <string name="connect_hide_api_key">Verbergen</string>
 
     <string name="settings_content_description">Verbindungseinstellungen</string>
 
@@ -18,6 +9,7 @@
     <string name="media_filter_all_months">Alle Monate</string>
     <string name="media_watched">Angesehen %1$d/%2$d</string>
     <string name="media_error_not_connected">Nicht verbunden</string>
+    <string name="media_action_connect">Verbinden</string>
 
     <string name="category_movie">Filme</string>
     <string name="category_series">Serien</string>
@@ -26,9 +18,6 @@
     <string name="category_album">Alben</string>
     <string name="category_game">Spiele</string>
 
-    <string name="about_title">Stapik Media (Android)</string>
-    <string name="about_version">Version %1$s</string>
-    <string name="about_description">Schreibgeschützte mobile Begleit-App für Stapik Media.</string>
 
     <string name="detail_back">Zurück</string>
     <string name="detail_release_date">Veröffentlichungsdatum</string>
@@ -46,22 +35,12 @@
 
     <string name="media_stale_banner">Zwischengespeicherte Daten vom %1$s</string>
 
-    <string name="settings_theme_label">Design</string>
-    <string name="theme_classic">Klassisch</string>
-    <string name="theme_modern">Modern</string>
-    <string name="theme_classic_pink">Klassisch Pink</string>
-    <string name="about_button">Über die App</string>
-    <string name="about_source_code">Quellcode auf GitHub ansehen</string>
 
-    <string name="menu_connect">Verbinden</string>
-    <string name="menu_about">Über die App</string>
 
-    <string name="about_author">Sebastian Smoliński</string>
 
     <string name="error_no_network">Keine Netzwerkverbindung.</string>
     <string name="error_unauthorized">Ungültige Server-URL oder API-Schlüssel.</string>
     <string name="error_not_found">Medienprotokoll wurde auf dem Server nicht gefunden. Überprüfe die Verbindungseinstellungen.</string>
-    <string name="error_cannot_verify">Keine Antwort vom Server - diese Zugangsdaten konnten nicht überprüft werden.</string>
     <string name="error_unknown">Etwas ist schiefgelaufen: %1$s</string>
 
     <string name="retry">Erneut versuchen</string>
