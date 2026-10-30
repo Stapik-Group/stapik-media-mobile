@@ -99,12 +99,12 @@ fun AppRoot(
                             onConnected = {
                                 scope.launch {
                                     savedConfig = configStorage.load()
-                                    viewModel.refresh()
+                                    viewModel.reload()
                                 }
                             },
                             onDisconnected = {
                                 savedConfig = null
-                                viewModel.refresh()
+                                viewModel.reload()
                             },
                             onClose = { screen = AppScreen.Media },
                             modifier = Modifier.fillMaxSize(),

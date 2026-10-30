@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -56,27 +57,34 @@ class MediaViewModel(
     private val _filters = MutableStateFlow(mapOf<MediaCategory, CategoryFilter>())
     val filters: StateFlow<Map<MediaCategory, CategoryFilter>> = _filters.asStateFlow()
 
+    private var updateJob: Job? = null
+
     init {
         viewModelScope.launch { archives.restoreLocal() }
         refresh()
     }
 
-    fun refresh(isPullToRefresh: Boolean = false) = launchUpdate(isPullToRefresh) {
-        controller.load()
-        if (!isPullToRefresh) showStoredCopy()
-        if (controller.document.value is DocumentUiState.Error) null else synchronize()
+    fun refresh(isPullToRefresh: Boolean = false) {
+        if (updateJob?.isActive == true) return
+        launchUpdate(keepView = isPullToRefresh || baseState.value is MediaUiState.Success) { synchronizeStoredCopy() }
     }
+
+    fun reload() = launchUpdate(keepView = false) { synchronizeStoredCopy() }
 
     fun refreshOnForeground() {
-        if (updateJob?.isActive == true || !resumeThrottle.isDue()) return
-        refresh(isPullToRefresh = true)
+        if (resumeThrottle.isDue()) refresh(isPullToRefresh = true)
     }
 
-    fun discardLocalAndResync() = launchUpdate(isPullToRefresh = false) { controller.discardLocalAndResync() }
+    fun discardLocalAndResync() = launchUpdate(keepView = false) { controller.discardLocalAndResync() }
 
-    private var updateJob: Job? = null
+    private suspend fun synchronizeStoredCopy(): SyncOutcome? {
+        controller.load()
+        showStoredCopy()
+        return if (controller.document.value is DocumentUiState.Error) null else synchronize()
+    }
 
     private fun showStoredCopy() {
+        if (baseState.value is MediaUiState.Success) return
         val state = mediaUiStateFor(controller.document.value, localSnapshot.value, failure = null)
         if (state is MediaUiState.Success) {
             baseState.value = state
@@ -84,9 +92,11 @@ class MediaViewModel(
         }
     }
 
-    private fun launchUpdate(isPullToRefresh: Boolean, update: suspend () -> SyncOutcome?) {
+    private fun launchUpdate(keepView: Boolean, update: suspend () -> SyncOutcome?) {
+        val previous = updateJob
         updateJob = viewModelScope.launch {
-            if (isPullToRefresh) {
+            previous?.cancelAndJoin()
+            if (keepView) {
                 _isRefreshing.value = true
             } else {
                 baseState.value = MediaUiState.Loading
