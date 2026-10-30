@@ -12,5 +12,5 @@ jobs:
   build:
     if: github.head_ref == 'develop'
     # Keep @v... equal to the tag of stapik-common-mobile that the submodule is on.
-    uses: Stapik-Group/stapik-common-mobile/.github/workflows/build.yml@v0.1.0
+    uses: Stapik-Group/stapik-common-mobile/.github/workflows/build.yml@v0.3.1
     secrets: inherit

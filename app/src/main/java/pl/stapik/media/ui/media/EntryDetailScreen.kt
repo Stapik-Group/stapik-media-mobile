@@ -10,6 +10,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -20,19 +22,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import pl.stapik.media.R
-import pl.stapik.media.data.model.DatePrecision
+import pl.stapik.media.data.model.EntryRating
 import pl.stapik.media.data.model.MediaEntry
-import pl.stapik.media.data.model.ReleaseDate
 import pl.stapik.media.data.model.details.MediaDetails
 import pl.stapik.media.ui.theme.RetroColorScheme
-import java.time.format.TextStyle
-import java.util.Locale
+import pl.stapik.media.util.formatConsumedDate
+import pl.stapik.media.util.formatReleaseDate
 
 @Composable
 fun EntryDetailScreen(
     entry: MediaEntry,
     scheme: RetroColorScheme,
+    canEdit: Boolean,
     onBack: () -> Unit,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier.fillMaxSize().background(scheme.windowBackground)) {
@@ -47,7 +51,20 @@ fun EntryDetailScreen(
                     tint = scheme.textDark,
                 )
             }
-            Text(entry.title, style = MaterialTheme.typography.titleLarge, color = scheme.textDark)
+            Text(
+                entry.title,
+                style = MaterialTheme.typography.titleLarge,
+                color = scheme.textDark,
+                modifier = Modifier.weight(1f),
+            )
+            if (canEdit) {
+                IconButton(onClick = onEdit) {
+                    Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.entry_edit), tint = scheme.textDark)
+                }
+                IconButton(onClick = onDelete) {
+                    Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.entry_delete), tint = scheme.textDark)
+                }
+            }
         }
 
         Column(
@@ -57,11 +74,15 @@ fun EntryDetailScreen(
                 .padding(16.dp),
         ) {
             DetailRow(stringResource(R.string.detail_release_date), formatReleaseDate(entry.releaseDate), scheme)
-            DetailRow(
-                stringResource(R.string.detail_consumed),
-                stringResource(R.string.media_watched, entry.consumed.month, entry.consumed.year),
-                scheme,
-            )
+            DetailRow(stringResource(entry.category.consumedDateLabelResource()), formatConsumedDate(entry.consumed), scheme)
+            entry.rating?.let { rating ->
+                DetailRow(
+                    stringResource(R.string.detail_rating),
+                    stringResource(R.string.detail_rating_value, rating, EntryRating.MAX),
+                    scheme,
+                )
+            }
+            DetailRow(stringResource(R.string.detail_note), entry.note, scheme)
 
             when (val details = entry.details) {
                 is MediaDetails.Screen -> {
@@ -101,17 +122,5 @@ private fun DetailRow(label: String, value: String, scheme: RetroColorScheme) {
     Column(modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)) {
         Text(label, style = MaterialTheme.typography.labelMedium, color = scheme.textMuted)
         Text(value, style = MaterialTheme.typography.bodyLarge, color = scheme.textDark)
-    }
-}
-
-private fun formatReleaseDate(releaseDate: ReleaseDate): String {
-    val date = releaseDate.date
-    return when (releaseDate.precision) {
-        DatePrecision.DAY -> "%02d %s %d".format(
-            date.dayOfMonth, date.month.getDisplayName(TextStyle.SHORT, Locale.getDefault()), date.year,
-        )
-
-        DatePrecision.MONTH -> "%s %d".format(date.month.getDisplayName(TextStyle.SHORT, Locale.getDefault()), date.year)
-        DatePrecision.YEAR -> date.year.toString()
     }
 }

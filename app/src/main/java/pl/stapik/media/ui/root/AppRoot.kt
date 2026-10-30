@@ -11,10 +11,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -22,6 +24,8 @@ import kotlinx.coroutines.launch
 import pl.stapik.media.R
 import pl.stapik.media.data.config.ApiConfig
 import pl.stapik.media.data.config.ApiConfigStorage
+import pl.stapik.media.ui.backup.BackupSection
+import pl.stapik.media.ui.csv.CsvSection
 import pl.stapik.media.ui.media.MediaPagerScreen
 import pl.stapik.media.ui.media.MediaViewModel
 import pl.stapik.media.ui.theme.ThemePreferenceStorage
@@ -32,6 +36,7 @@ import pl.stapik.common.presentation.ConnectController
 import pl.stapik.common.theme.ThemeId
 import pl.stapik.common.ui.shell.AppDefinition
 import pl.stapik.common.ui.shell.SettingsFlow
+import pl.stapik.common.ui.sync.FirstConnectionDialog
 import pl.stapik.common.ui.theme.StapikTheme
 
 private val appDefinition = AppDefinition(
@@ -53,11 +58,12 @@ fun AppRoot(
     viewModel: MediaViewModel,
     newConnectController: (CloudConfig?) -> ConnectController,
 ) {
-    var screen by remember { mutableStateOf<AppScreen>(AppScreen.Media) }
+    var screen by rememberSaveable { mutableStateOf(AppScreen.Media) }
     var savedConfig by remember { mutableStateOf<ApiConfig?>(null) }
     var currentTheme by remember { mutableStateOf(ThemeId.CLASSIC) }
     val scope = rememberCoroutineScope()
     val scheme = colorsFor(currentTheme)
+    val pendingChoice by viewModel.pendingChoice.collectAsState()
 
     LaunchedEffect(Unit) {
         savedConfig = configStorage.load()
@@ -76,14 +82,14 @@ fun AppRoot(
         ) { innerPadding ->
             Box(modifier = Modifier.fillMaxSize().padding(innerPadding).consumeWindowInsets(innerPadding)) {
                 when (screen) {
-                    is AppScreen.Media -> MediaPagerScreen(
+                    AppScreen.Media -> MediaPagerScreen(
                         viewModel = viewModel,
                         scheme = scheme,
                         onNavigateToConnect = { screen = AppScreen.Settings },
                         modifier = Modifier.fillMaxSize(),
                     )
 
-                    is AppScreen.Settings -> {
+                    AppScreen.Settings -> {
                         val connectController = remember {
                             newConnectController(savedConfig?.let { CloudConfig(it.serverUrl, it.apiKey, it.passphrase) })
                         }
@@ -99,19 +105,30 @@ fun AppRoot(
                             onConnected = {
                                 scope.launch {
                                     savedConfig = configStorage.load()
-                                    viewModel.refresh()
+                                    viewModel.reload()
                                 }
                             },
                             onDisconnected = {
                                 savedConfig = null
-                                viewModel.refresh()
+                                viewModel.reload()
                             },
                             onClose = { screen = AppScreen.Media },
                             modifier = Modifier.fillMaxSize(),
+                            extra = {
+                                BackupSection(viewModel.backup)
+                                CsvSection(viewModel.csv)
+                            },
                         )
                     }
                 }
             }
+        }
+        pendingChoice?.let { prompt ->
+            FirstConnectionDialog(
+                canKeepLocal = prompt.canKeepLocal,
+                onChoose = viewModel::chooseFirstConnection,
+                onCancel = viewModel::cancelFirstConnection,
+            )
         }
     }
 }

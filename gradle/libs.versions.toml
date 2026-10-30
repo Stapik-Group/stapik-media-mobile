@@ -18,6 +18,8 @@ foundation = "1.12.0"
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 core-cloud = { module = "pl.stapik.common:core-cloud" }
+core-document = { module = "pl.stapik.common:core-document" }
+core-work = { module = "pl.stapik.common:core-work" }
 core-crypto = { module = "pl.stapik.common:core-crypto" }
 core-i18n = { module = "pl.stapik.common:core-i18n" }
 core-model = { module = "pl.stapik.common:core-model" }
@@ -47,6 +49,7 @@ datastore-preferences = { group = "androidx.datastore", name = "datastore-prefer
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
 ui-shell = { module = "pl.stapik.common:ui-shell" }
+ui-sync = { module = "pl.stapik.common:ui-sync" }
 ui-theme = { module = "pl.stapik.common:ui-theme" }
 
 [plugins]
