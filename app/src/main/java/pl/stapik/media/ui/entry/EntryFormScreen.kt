@@ -65,6 +65,7 @@ fun EntryFormScreen(
     isNew: Boolean,
     busy: Boolean,
     refusal: WriteRefusal?,
+    failureMessage: String?,
     scheme: RetroColorScheme,
     onSave: (MediaEntry) -> Unit,
     onCancel: () -> Unit,
@@ -110,6 +111,7 @@ fun EntryFormScreen(
                 singleLine = false,
             )
             refusal?.let { Text(text = refusalMessage(it, form), color = MaterialTheme.colorScheme.error) }
+            failureMessage?.let { Text(text = it, color = MaterialTheme.colorScheme.error) }
         }
         Row(
             modifier = Modifier.fillMaxWidth().padding(16.dp),

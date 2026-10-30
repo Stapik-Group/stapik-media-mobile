@@ -31,6 +31,12 @@
     <string name="entry_error_duplicate">Na liście jest już „%1$s” (%2$s) w tej kategorii. Ten sam tytuł może wystąpić ponownie tylko z innym rokiem wydania.</string>
     <string name="entry_error_archive_not_loaded">Wpisy z tego roku są w archiwum w chmurze, które nie zostało jeszcze pobrane. Wybierz najpierw ten rok w filtrze, aby je wczytać, a potem spróbuj ponownie.</string>
     <string name="entry_error_missing">Wpis został w międzyczasie usunięty, na przykład przez synchronizację. Zmiany nie zostały zapisane.</string>
+    <string name="entry_added">Dodano wpis</string>
+    <string name="entry_updated">Zapisano wpis</string>
+    <string name="entry_deleted">Usunięto wpis</string>
+    <string name="entry_undo">Cofnij</string>
+    <string name="entry_delete">Usuń wpis</string>
+    <string name="entry_error_save_failed">Nie udało się zapisać zmiany.</string>
     <string name="media_action_connect">Połącz</string>
 
     <string name="category_movie">Filmy</string>
@@ -61,8 +67,6 @@
     <string name="media_archive_loading">Pobieranie archiwum z roku %1$d…</string>
     <string name="media_archive_failed">Nie udało się pobrać archiwum z roku %1$d.</string>
     <string name="media_unreadable_entries">Pominięte wpisy, których nie udało się odczytać: %1$d</string>
-    <string name="media_sync_offline_network">Brak połączenia z chmurą. Pokazuję kopię zapisaną na urządzeniu</string>
-    <string name="media_sync_offline_server">Chmura nie odpowiada. Pokazuję kopię zapisaną na urządzeniu</string>
     <string name="media_search_placeholder">Szukaj po tytule</string>
     <string name="media_search_clear">Wyczyść wyszukiwanie</string>
     <string name="media_sort_title">Tytuł</string>

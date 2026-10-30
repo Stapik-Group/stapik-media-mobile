@@ -31,6 +31,12 @@
     <string name="entry_error_duplicate">In dieser Kategorie gibt es bereits „%1$s“ (%2$s). Derselbe Titel kann nur mit einem anderen Erscheinungsjahr erneut vorkommen.</string>
     <string name="entry_error_archive_not_loaded">Die Einträge dieses Jahres liegen in einem Cloud-Archiv, das noch nicht heruntergeladen wurde. Wähle das Jahr zuerst im Filter aus, um es zu laden, und versuche es dann erneut.</string>
     <string name="entry_error_missing">Der Eintrag wurde inzwischen entfernt, zum Beispiel durch eine Synchronisierung. Deine Änderungen wurden nicht gespeichert.</string>
+    <string name="entry_added">Eintrag hinzugefügt</string>
+    <string name="entry_updated">Eintrag gespeichert</string>
+    <string name="entry_deleted">Eintrag gelöscht</string>
+    <string name="entry_undo">Rückgängig</string>
+    <string name="entry_delete">Eintrag löschen</string>
+    <string name="entry_error_save_failed">Die Änderung konnte nicht gespeichert werden.</string>
     <string name="media_action_connect">Verbinden</string>
 
     <string name="category_movie">Filme</string>
@@ -61,8 +67,6 @@
     <string name="media_archive_loading">Archiv %1$d wird heruntergeladen…</string>
     <string name="media_archive_failed">Das Archiv %1$d konnte nicht heruntergeladen werden.</string>
     <string name="media_unreadable_entries">Nicht lesbare Einträge, die übersprungen wurden: %1$d</string>
-    <string name="media_sync_offline_network">Keine Verbindung zur Cloud. Es wird die auf dem Gerät gespeicherte Kopie angezeigt</string>
-    <string name="media_sync_offline_server">Die Cloud antwortet nicht. Es wird die auf dem Gerät gespeicherte Kopie angezeigt</string>
     <string name="media_search_placeholder">Nach Titel suchen</string>
     <string name="media_search_clear">Suche löschen</string>
     <string name="media_sort_title">Titel</string>

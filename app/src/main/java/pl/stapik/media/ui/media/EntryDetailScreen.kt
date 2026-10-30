@@ -10,6 +10,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -31,7 +33,10 @@ import pl.stapik.media.util.formatReleaseDate
 fun EntryDetailScreen(
     entry: MediaEntry,
     scheme: RetroColorScheme,
+    canEdit: Boolean,
     onBack: () -> Unit,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier.fillMaxSize().background(scheme.windowBackground)) {
@@ -46,7 +51,20 @@ fun EntryDetailScreen(
                     tint = scheme.textDark,
                 )
             }
-            Text(entry.title, style = MaterialTheme.typography.titleLarge, color = scheme.textDark)
+            Text(
+                entry.title,
+                style = MaterialTheme.typography.titleLarge,
+                color = scheme.textDark,
+                modifier = Modifier.weight(1f),
+            )
+            if (canEdit) {
+                IconButton(onClick = onEdit) {
+                    Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.entry_edit), tint = scheme.textDark)
+                }
+                IconButton(onClick = onDelete) {
+                    Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.entry_delete), tint = scheme.textDark)
+                }
+            }
         }
 
         Column(

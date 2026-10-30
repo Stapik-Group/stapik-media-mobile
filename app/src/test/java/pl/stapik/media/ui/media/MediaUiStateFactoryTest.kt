@@ -51,6 +51,15 @@ class MediaUiStateFactoryTest {
     }
 
     @Test
+    fun aReadOnlyKeyTurnsEditingOff() {
+        val readOnly = synchronizedCopy.copy(canWrite = false)
+
+        assertFalse((mediaUiStateFor(loaded, readOnly, failure = null, connected = true) as MediaUiState.Success).canEdit)
+        assertTrue((mediaUiStateFor(loaded, synchronizedCopy, failure = null, connected = true) as MediaUiState.Success).canEdit)
+        assertTrue((mediaUiStateFor(empty, snapshot = null, failure = null, connected = false) as MediaUiState.Success).canEdit)
+    }
+
+    @Test
     fun aSuccessfulRefreshIsNotStale() {
         val state = mediaUiStateFor(loaded, synchronizedCopy, failure = null, connected = true) as MediaUiState.Success
 

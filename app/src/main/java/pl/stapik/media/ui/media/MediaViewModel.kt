@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import pl.stapik.common.presentation.DocumentController
@@ -53,8 +52,6 @@ class MediaViewModel(
     }.stateIn(viewModelScope, SharingStarted.Eagerly, MediaUiState.Loading)
 
     val syncState: StateFlow<SyncUiState> = controller.sync
-        .map { it.forReadOnlyApp() }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, controller.sync.value.forReadOnlyApp())
 
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()

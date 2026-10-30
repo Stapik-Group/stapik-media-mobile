@@ -31,6 +31,12 @@
     <string name="entry_error_duplicate">The list already has “%1$s” (%2$s) in this category. The same title can appear again only with a different release year.</string>
     <string name="entry_error_archive_not_loaded">Entries from that year are stored in a cloud archive that has not been downloaded yet. Select the year in the filter first to load it, then try again.</string>
     <string name="entry_error_missing">The entry was removed in the meantime, for example by a synchronization. Your changes were not saved.</string>
+    <string name="entry_added">Entry added</string>
+    <string name="entry_updated">Entry saved</string>
+    <string name="entry_deleted">Entry deleted</string>
+    <string name="entry_undo">Undo</string>
+    <string name="entry_delete">Delete entry</string>
+    <string name="entry_error_save_failed">The change could not be saved.</string>
     <string name="media_action_connect">Connect</string>
 
     <string name="category_movie">Movies</string>
@@ -61,8 +67,6 @@
     <string name="media_archive_loading">Downloading the archive of %1$d…</string>
     <string name="media_archive_failed">Could not download the archive of %1$d.</string>
     <string name="media_unreadable_entries">Entries that could not be read and are skipped: %1$d</string>
-    <string name="media_sync_offline_network">No connection to the cloud. Showing the copy stored on this device</string>
-    <string name="media_sync_offline_server">The cloud is not responding. Showing the copy stored on this device</string>
     <string name="media_search_placeholder">Search by title</string>
     <string name="media_search_clear">Clear search</string>
     <string name="media_sort_title">Title</string>

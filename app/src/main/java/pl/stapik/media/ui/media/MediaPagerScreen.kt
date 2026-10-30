@@ -33,6 +33,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.SmallFloatingActionButton
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
+import androidx.compose.ui.res.stringResource
+import java.time.LocalDate
+import kotlinx.coroutines.CancellationException
+import pl.stapik.media.R
+import pl.stapik.media.data.library.WriteRefusal
+import pl.stapik.media.data.library.WriteResult
+import pl.stapik.media.ui.entry.EditorTarget
+import pl.stapik.media.ui.entry.EditorTargetSaver
+import pl.stapik.media.ui.entry.EntryForm
+import pl.stapik.media.ui.entry.EntryFormScreen
+import pl.stapik.media.ui.entry.EntrySuggestions
 import pl.stapik.media.data.model.MediaCategory
 import pl.stapik.media.data.model.MediaEntry
 import pl.stapik.media.ui.theme.RetroColorScheme
@@ -50,6 +69,83 @@ fun MediaPagerScreen(
     val pagerState = rememberPagerState(pageCount = { categories.size })
     val scope = rememberCoroutineScope()
     var detailEntry by rememberSaveable(stateSaver = MediaEntryStateSaver) { mutableStateOf<MediaEntry?>(null) }
+    var editor by rememberSaveable(stateSaver = EditorTargetSaver) { mutableStateOf<EditorTarget?>(null) }
+    var saving by remember { mutableStateOf(false) }
+    var refusal by remember { mutableStateOf<WriteRefusal?>(null) }
+    var saveFailed by remember { mutableStateOf(false) }
+    val snackbars = remember { SnackbarHostState() }
+    val uiState by viewModel.uiState.collectAsState()
+    val loaded = uiState as? MediaUiState.Success
+    val canEdit = loaded?.canEdit == true
+    val addedText = stringResource(R.string.entry_added)
+    val updatedText = stringResource(R.string.entry_updated)
+    val deletedText = stringResource(R.string.entry_deleted)
+    val undoLabel = stringResource(R.string.entry_undo)
+    val saveFailedText = stringResource(R.string.entry_error_save_failed)
+
+    val announce: (String, suspend () -> Unit) -> Unit = { message, undo ->
+        scope.launch {
+            val outcome = snackbars.showSnackbar(message = message, actionLabel = undoLabel, duration = SnackbarDuration.Long)
+            if (outcome == SnackbarResult.ActionPerformed) {
+                try {
+                    undo()
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    snackbars.showSnackbar(saveFailedText)
+                }
+            }
+        }
+    }
+
+    val save: (EditorTarget, MediaEntry) -> Unit = { target, entry ->
+        scope.launch {
+            saving = true
+            refusal = null
+            saveFailed = false
+            try {
+                val result = when (target) {
+                    is EditorTarget.New -> viewModel.addEntry(entry)
+                    is EditorTarget.Edit -> viewModel.updateEntry(target.entry.id, entry)
+                }
+                when (result) {
+                    is WriteResult.Done -> {
+                        editor = null
+                        when (target) {
+                            is EditorTarget.New -> announce(addedText) { viewModel.deleteEntry(result.entry.id) }
+                            is EditorTarget.Edit -> {
+                                detailEntry = result.entry
+                                announce(updatedText) { viewModel.updateEntry(target.entry.id, target.entry) }
+                            }
+                        }
+                    }
+                    is WriteResult.Refused -> refusal = result.refusal
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                saveFailed = true
+            } finally {
+                saving = false
+            }
+        }
+    }
+
+    val delete: (MediaEntry) -> Unit = { entry ->
+        scope.launch {
+            try {
+                val result = viewModel.deleteEntry(entry.id)
+                if (result is WriteResult.Done) {
+                    detailEntry = null
+                    announce(deletedText) { viewModel.addEntry(result.entry) }
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                snackbars.showSnackbar(saveFailedText)
+            }
+        }
+    }
 
     // Covers both the system back button and the edge-swipe back gesture.
     BackHandler(enabled = detailEntry != null) { detailEntry = null }
@@ -123,7 +219,7 @@ fun MediaPagerScreen(
 
             HorizontalPager(
                 state = pagerState,
-                userScrollEnabled = detailEntry == null, // don't fight the detail screen's back gesture
+                userScrollEnabled = detailEntry == null && editor == null, // don't fight the back gesture of the overlays
                 modifier = Modifier.fillMaxSize(),
             ) { page ->
                 CategoryPage(
@@ -137,13 +233,61 @@ fun MediaPagerScreen(
             }
         }
 
+        if (canEdit && detailEntry == null && editor == null) {
+            SmallFloatingActionButton(
+                onClick = {
+                    refusal = null
+                    saveFailed = false
+                    editor = EditorTarget.New(categories[pagerState.currentPage])
+                },
+                modifier = Modifier.align(Alignment.BottomEnd).padding(end = 20.dp, bottom = 92.dp),
+            ) {
+                Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.entry_add))
+            }
+        }
+
         detailEntry?.let { entry ->
             EntryDetailScreen(
                 entry = entry,
                 scheme = scheme,
+                canEdit = canEdit,
                 onBack = { detailEntry = null },
+                onEdit = {
+                    refusal = null
+                    saveFailed = false
+                    editor = EditorTarget.Edit(entry)
+                },
+                onDelete = { delete(entry) },
                 modifier = Modifier.fillMaxSize(),
             )
         }
+
+        editor?.let { target ->
+            val category = when (target) {
+                is EditorTarget.New -> target.category
+                is EditorTarget.Edit -> target.entry.category
+            }
+            val initial = remember(target) {
+                when (target) {
+                    is EditorTarget.New -> EntryForm.blank(target.category, LocalDate.now())
+                    is EditorTarget.Edit -> EntryForm.from(target.entry)
+                }
+            }
+            val suggestions = remember(loaded?.entries, category) { EntrySuggestions.collect(loaded?.entries.orEmpty(), category) }
+            EntryFormScreen(
+                initial = initial,
+                suggestions = suggestions,
+                isNew = target is EditorTarget.New,
+                busy = saving,
+                refusal = refusal,
+                failureMessage = if (saveFailed) saveFailedText else null,
+                scheme = scheme,
+                onSave = { entry -> save(target, entry) },
+                onCancel = { editor = null },
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
+
+        SnackbarHost(hostState = snackbars, modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 8.dp))
     }
 }

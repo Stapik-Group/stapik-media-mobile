@@ -20,5 +20,6 @@ fun mediaUiStateFor(
         unreadableEntries = document.value.unreadableEntries,
         refreshError = failure.takeIf { announceFailure },
         connected = connected,
+        canEdit = snapshot?.canWrite ?: true,
     )
 }

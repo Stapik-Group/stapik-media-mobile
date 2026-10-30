@@ -16,6 +16,7 @@ sealed interface MediaUiState {
         val unreadableEntries: Int = 0,
         val refreshError: MediaLoadError? = null,
         val connected: Boolean = true,
+        val canEdit: Boolean = true,
     ) : MediaUiState
 
     data class LocalDataError(val kind: LoadErrorKind) : MediaUiState
