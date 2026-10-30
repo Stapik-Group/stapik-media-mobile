@@ -11,6 +11,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,6 +34,7 @@ import pl.stapik.common.presentation.ConnectController
 import pl.stapik.common.theme.ThemeId
 import pl.stapik.common.ui.shell.AppDefinition
 import pl.stapik.common.ui.shell.SettingsFlow
+import pl.stapik.common.ui.sync.FirstConnectionDialog
 import pl.stapik.common.ui.theme.StapikTheme
 
 private val appDefinition = AppDefinition(
@@ -59,6 +61,7 @@ fun AppRoot(
     var currentTheme by remember { mutableStateOf(ThemeId.CLASSIC) }
     val scope = rememberCoroutineScope()
     val scheme = colorsFor(currentTheme)
+    val pendingChoice by viewModel.pendingChoice.collectAsState()
 
     LaunchedEffect(Unit) {
         savedConfig = configStorage.load()
@@ -113,6 +116,13 @@ fun AppRoot(
                     }
                 }
             }
+        }
+        pendingChoice?.let { prompt ->
+            FirstConnectionDialog(
+                canKeepLocal = prompt.canKeepLocal,
+                onChoose = viewModel::chooseFirstConnection,
+                onCancel = viewModel::cancelFirstConnection,
+            )
         }
     }
 }

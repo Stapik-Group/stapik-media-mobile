@@ -44,7 +44,6 @@
     <string name="media_unreadable_entries">Pominięte wpisy, których nie udało się odczytać: %1$d</string>
     <string name="media_sync_offline_network">Brak połączenia z chmurą. Pokazuję kopię zapisaną na urządzeniu</string>
     <string name="media_sync_offline_server">Chmura nie odpowiada. Pokazuję kopię zapisaną na urządzeniu</string>
-    <string name="media_sync_cloud_document_missing">W chmurze nie ma danych tej aplikacji. Pokazuję kopię zapisaną na urządzeniu</string>
     <string name="media_search_placeholder">Szukaj po tytule</string>
     <string name="media_search_clear">Wyczyść wyszukiwanie</string>
     <string name="media_sort_title">Tytuł</string>

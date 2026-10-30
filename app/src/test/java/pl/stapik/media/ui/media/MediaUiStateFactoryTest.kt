@@ -13,6 +13,7 @@ import pl.stapik.media.data.serialization.MediaPayload
 class MediaUiStateFactoryTest {
     private val synchronizedCopy = LocalSnapshot(lastUpdate = "2026-10-30T10:00:00Z", everSynchronized = true)
     private val loaded = DocumentUiState.Success(MediaPayload(unreadable = listOf(JsonNull, JsonNull)))
+    private val empty = DocumentUiState.Success(MediaPayload())
 
     @Test
     fun unreadableLocalDataWinsOverAnyFailure() {
@@ -23,16 +24,26 @@ class MediaUiStateFactoryTest {
 
     @Test
     fun withoutASynchronisedCopyTheFailureIsShown() {
-        val state = mediaUiStateFor(loaded, snapshot = null, failure = MediaLoadError.NoNetwork)
+        val state = mediaUiStateFor(empty, snapshot = null, failure = MediaLoadError.NoNetwork)
 
         assertEquals(MediaUiState.Error(MediaLoadError.NoNetwork), state)
     }
 
     @Test
     fun withoutASynchronisedCopyAndWithoutFailureTheCloudDocumentIsMissing() {
-        val state = mediaUiStateFor(loaded, LocalSnapshot("", everSynchronized = false), failure = null)
+        val state = mediaUiStateFor(empty, LocalSnapshot("", everSynchronized = false), failure = null)
 
         assertEquals(MediaUiState.Error(MediaLoadError.NotFound), state)
+    }
+
+    @Test
+    fun dataThatWasNeverSynchronisedIsStillShown() {
+        val neverSynchronised = LocalSnapshot(lastUpdate = "2026-10-30T09:00:00Z", everSynchronized = false)
+
+        val state = mediaUiStateFor(loaded, neverSynchronised, failure = null) as MediaUiState.Success
+
+        assertEquals(false, state.isStale)
+        assertEquals("2026-10-30T09:00:00Z", state.updatedAt)
     }
 
     @Test

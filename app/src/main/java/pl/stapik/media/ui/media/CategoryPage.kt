@@ -124,13 +124,14 @@ fun CategoryPage(
                                     SyncAction.RETRY -> viewModel.refresh()
                                     SyncAction.RECONNECT, SyncAction.ENTER_PASSPHRASE -> onNavigateToConnect()
                                     SyncAction.UPDATE_APP -> uriHandler.openUri(AppInfo.RELEASES_URL)
-                                    SyncAction.CHOOSE_SOURCE, SyncAction.DISMISS -> Unit
+                                    SyncAction.CHOOSE_SOURCE -> viewModel.refresh(isPullToRefresh = true)
+                                    SyncAction.DISMISS -> Unit
                                 }
                             },
                         )
                     }
 
-                    if (state.isStale) {
+                    if (state.isStale && state.updatedAt.isNotEmpty()) {
                         item { StaleDataBanner(updatedAt = state.updatedAt, scheme = scheme) }
                     }
 

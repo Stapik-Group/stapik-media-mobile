@@ -19,16 +19,6 @@ class ReadOnlySyncMessagesTest {
     }
 
     @Test
-    fun aMissingCloudDocumentOffersRetryInsteadOfReconnecting() {
-        val state = SyncUiState(SyncBadge.READ_ONLY, "sync.read_only", setOf(SyncAction.RECONNECT))
-
-        val mapped = state.forReadOnlyApp()
-
-        assertEquals("media.sync.cloud_document_missing", mapped.messageKey)
-        assertEquals(setOf(SyncAction.RETRY), mapped.actions)
-    }
-
-    @Test
     fun otherMessagesStayAsTheLibraryWroteThem() {
         val state = SyncUiState(SyncBadge.AUTH, "sync.auth.unauthorized", setOf(SyncAction.RECONNECT))
 

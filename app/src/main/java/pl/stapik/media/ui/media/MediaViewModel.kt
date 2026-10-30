@@ -61,6 +61,9 @@ class MediaViewModel(
     private val _filters = MutableStateFlow(mapOf<MediaCategory, CategoryFilter>())
     val filters: StateFlow<Map<MediaCategory, CategoryFilter>> = _filters.asStateFlow()
 
+    private val _pendingChoice = MutableStateFlow<SyncOutcome.NeedsFirstConnectionChoice?>(null)
+    val pendingChoice: StateFlow<SyncOutcome.NeedsFirstConnectionChoice?> = _pendingChoice.asStateFlow()
+
     private var updateJob: Job? = null
 
     init {
@@ -128,13 +131,20 @@ class MediaViewModel(
         }
     }
 
+    fun chooseFirstConnection(choice: FirstConnectionChoice) {
+        _pendingChoice.value = null
+        launchUpdate(keepView = true) { controller.sync(choice) }
+    }
+
+    fun cancelFirstConnection() {
+        _pendingChoice.value = null
+    }
+
     private suspend fun synchronize(): SyncOutcome {
+        _pendingChoice.value = null
         val outcome = controller.sync()
-        return if (outcome is SyncOutcome.NeedsFirstConnectionChoice) {
-            controller.sync(FirstConnectionChoice.USE_CLOUD)
-        } else {
-            outcome
-        }
+        if (outcome is SyncOutcome.NeedsFirstConnectionChoice) _pendingChoice.value = outcome
+        return outcome
     }
 
     private fun stateAfter(outcome: SyncOutcome?): MediaUiState =

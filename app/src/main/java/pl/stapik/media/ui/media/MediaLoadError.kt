@@ -39,10 +39,9 @@ fun SyncOutcome.toMediaLoadError(): MediaLoadError? = when (this) {
     is SyncOutcome.Offline -> cause.toMediaLoadError()
     is SyncOutcome.AuthProblem -> MediaLoadError.Unauthorized
     is SyncOutcome.RemoteUnreadable -> MediaLoadError.Unreadable(unreadableKey(kind))
-    is SyncOutcome.NeedsFirstConnectionChoice, is SyncOutcome.NewerSchema ->
-        MediaLoadError.Unknown(this::class.simpleName.orEmpty())
-    SyncOutcome.LocalOnly, SyncOutcome.Synchronized, SyncOutcome.ServerWon, SyncOutcome.LocalWon,
-    SyncOutcome.KeptLocalUnsynced -> null
+    is SyncOutcome.NewerSchema -> MediaLoadError.Unknown(this::class.simpleName.orEmpty())
+    is SyncOutcome.NeedsFirstConnectionChoice, SyncOutcome.LocalOnly, SyncOutcome.Synchronized, SyncOutcome.ServerWon,
+    SyncOutcome.LocalWon, SyncOutcome.KeptLocalUnsynced -> null
 }
 
 private fun unreadableKey(kind: UnreadableKind): String = when (kind) {
