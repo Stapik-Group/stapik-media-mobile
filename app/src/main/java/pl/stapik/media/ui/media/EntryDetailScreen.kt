@@ -20,13 +20,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import pl.stapik.media.R
-import pl.stapik.media.data.model.DatePrecision
 import pl.stapik.media.data.model.MediaEntry
-import pl.stapik.media.data.model.ReleaseDate
 import pl.stapik.media.data.model.details.MediaDetails
 import pl.stapik.media.ui.theme.RetroColorScheme
-import java.time.format.TextStyle
-import java.util.Locale
+import pl.stapik.media.util.formatConsumedDate
+import pl.stapik.media.util.formatReleaseDate
 
 @Composable
 fun EntryDetailScreen(
@@ -57,11 +55,7 @@ fun EntryDetailScreen(
                 .padding(16.dp),
         ) {
             DetailRow(stringResource(R.string.detail_release_date), formatReleaseDate(entry.releaseDate), scheme)
-            DetailRow(
-                stringResource(R.string.detail_consumed),
-                stringResource(R.string.media_watched, entry.consumed.month, entry.consumed.year),
-                scheme,
-            )
+            DetailRow(stringResource(entry.category.consumedDateLabelResource()), formatConsumedDate(entry.consumed), scheme)
 
             when (val details = entry.details) {
                 is MediaDetails.Screen -> {
@@ -101,17 +95,5 @@ private fun DetailRow(label: String, value: String, scheme: RetroColorScheme) {
     Column(modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)) {
         Text(label, style = MaterialTheme.typography.labelMedium, color = scheme.textMuted)
         Text(value, style = MaterialTheme.typography.bodyLarge, color = scheme.textDark)
-    }
-}
-
-private fun formatReleaseDate(releaseDate: ReleaseDate): String {
-    val date = releaseDate.date
-    return when (releaseDate.precision) {
-        DatePrecision.DAY -> "%02d %s %d".format(
-            date.dayOfMonth, date.month.getDisplayName(TextStyle.SHORT, Locale.getDefault()), date.year,
-        )
-
-        DatePrecision.MONTH -> "%s %d".format(date.month.getDisplayName(TextStyle.SHORT, Locale.getDefault()), date.year)
-        DatePrecision.YEAR -> date.year.toString()
     }
 }

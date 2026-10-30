@@ -11,10 +11,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import pl.stapik.media.R
 import pl.stapik.media.data.model.MediaEntry
 import pl.stapik.media.ui.theme.RetroColorScheme
 import pl.stapik.media.ui.theme.retroPanel
+import pl.stapik.media.util.formatConsumedDate
 
 @Composable
 fun EntryCard(
@@ -32,7 +32,7 @@ fun EntryCard(
     ) {
         Text(text = entry.title, color = scheme.textDark, fontWeight = FontWeight.Bold)
         Text(
-            text = stringResource(R.string.media_watched, entry.consumed.month, entry.consumed.year),
+            text = stringResource(entry.category.consumedLineResource(), formatConsumedDate(entry.consumed)),
             color = scheme.textMuted,
             style = MaterialTheme.typography.bodySmall,
         )

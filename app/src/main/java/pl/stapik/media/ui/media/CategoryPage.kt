@@ -319,12 +319,7 @@ private fun SortField.label(category: MediaCategory): String = stringResource(
     when (this) {
         SortField.TITLE -> R.string.media_sort_title
         SortField.RELEASE_DATE -> R.string.media_sort_release_date
-        SortField.CONSUMED -> when (category) {
-            MediaCategory.MOVIE, MediaCategory.SERIES, MediaCategory.CARTOON -> R.string.media_sort_consumed_watched
-            MediaCategory.BOOK -> R.string.media_sort_consumed_read
-            MediaCategory.ALBUM -> R.string.media_sort_consumed_listened
-            MediaCategory.GAME -> R.string.media_sort_consumed_completed
-        }
+        SortField.CONSUMED -> category.consumedDateLabelResource()
     },
 )
 

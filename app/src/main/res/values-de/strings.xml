@@ -7,7 +7,10 @@
     <string name="media_no_entries">Noch keine Einträge</string>
     <string name="media_filter_all_years">Alle Jahre</string>
     <string name="media_filter_all_months">Alle Monate</string>
-    <string name="media_watched">Angesehen %1$d/%2$d</string>
+    <string name="media_consumed_watched">Gesehen %1$s</string>
+    <string name="media_consumed_read">Gelesen %1$s</string>
+    <string name="media_consumed_listened">Gehört %1$s</string>
+    <string name="media_consumed_completed">Durchgespielt %1$s</string>
     <string name="media_error_not_connected">Nicht verbunden</string>
     <string name="media_action_connect">Verbinden</string>
 
@@ -21,7 +24,6 @@
 
     <string name="detail_back">Zurück</string>
     <string name="detail_release_date">Veröffentlichungsdatum</string>
-    <string name="detail_consumed">Angesehen</string>
     <string name="detail_director">Regisseur</string>
     <string name="detail_genre">Genre</string>
     <string name="detail_author">Autor</string>
