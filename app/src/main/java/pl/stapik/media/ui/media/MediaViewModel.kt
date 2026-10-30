@@ -2,6 +2,7 @@ package pl.stapik.media.ui.media
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -83,8 +84,10 @@ class MediaViewModel(
                 if (state is MediaUiState.Success) archives.refreshYears()
                 baseState.value = state
                 if (state is MediaUiState.Success) archives.syncLoaded()
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
-                baseState.value = MediaUiState.Error(e.toMediaLoadError())
+                baseState.value = stateAfterFailure(e)
             } finally {
                 _isRefreshing.value = false
             }
@@ -100,23 +103,12 @@ class MediaViewModel(
         }
     }
 
-    private fun stateAfter(outcome: SyncOutcome?): MediaUiState = when (val document = controller.document.value) {
-        DocumentUiState.Loading -> MediaUiState.Loading
-        is DocumentUiState.Error -> MediaUiState.LocalDataError(document.kind)
-        is DocumentUiState.Success -> {
-            val failure = outcome?.toMediaLoadError()
-            val lastSynced = localSnapshot.value?.takeIf { it.everSynchronized }
-            if (lastSynced == null) {
-                MediaUiState.Error(failure ?: MediaLoadError.NotFound)
-            } else {
-                MediaUiState.Success(
-                    entries = document.value.entries,
-                    isStale = failure != null,
-                    updatedAt = lastSynced.lastUpdate,
-                    unreadableEntries = document.value.unreadableEntries,
-                )
-            }
-        }
+    private fun stateAfter(outcome: SyncOutcome?): MediaUiState =
+        mediaUiStateFor(controller.document.value, localSnapshot.value, outcome?.toMediaLoadError())
+
+    private suspend fun stateAfterFailure(error: Exception): MediaUiState {
+        controller.load()
+        return mediaUiStateFor(controller.document.value, localSnapshot.value, error.toMediaLoadError(), announceFailure = true)
     }
 
     fun setYearFilter(category: MediaCategory, year: Int?) {

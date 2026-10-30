@@ -122,6 +122,10 @@ fun CategoryPage(
                         item { StaleDataBanner(updatedAt = state.updatedAt, scheme = scheme) }
                     }
 
+                    state.refreshError?.let { error ->
+                        item { NoticeBanner(text = error.toDisplayMessage(), scheme = scheme) }
+                    }
+
                     if (state.unreadableEntries > 0) {
                         item {
                             NoticeBanner(
