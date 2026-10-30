@@ -192,8 +192,11 @@ private fun ArchiveStatusRow(year: Int, status: ArchiveStatus, onRetry: () -> Un
             Text(text = stringResource(R.string.media_archive_loading, year), color = scheme.textDark)
         }
 
-        ArchiveStatus.Failed -> Column {
+        is ArchiveStatus.Failed -> Column {
             Text(text = stringResource(R.string.media_archive_failed, year), color = scheme.textDark)
+            status.outcome?.toMediaLoadError()?.let { cause ->
+                Text(text = cause.toDisplayMessage(), color = scheme.textMuted)
+            }
             Spacer(modifier = Modifier.height(8.dp))
             RetroButton(text = stringResource(R.string.retry), onClick = onRetry, scheme = scheme)
         }

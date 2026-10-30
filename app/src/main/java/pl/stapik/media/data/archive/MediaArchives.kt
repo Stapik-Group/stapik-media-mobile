@@ -66,19 +66,27 @@ class MediaArchives(
     suspend fun request(year: Int) {
         if (year in mutableDocuments.value || year !in mutableYears.value) return
         mutableStatus.update { it + (year to ArchiveStatus.Loading) }
-        try {
+        val outcome = try {
             sync(year)
         } catch (e: CancellationException) {
             mutableStatus.update { it - year }
             throw e
         }
-        mutableStatus.update { if (year in mutableDocuments.value) it - year else it + (year to ArchiveStatus.Failed) }
+        mutableStatus.update { if (year in mutableDocuments.value) it - year else it + (year to ArchiveStatus.Failed(outcome)) }
     }
 
-    private suspend fun sync(year: Int) = guarded(year) { archive ->
-        val outcome = archive.engine.sync()
-        if (outcome is SyncOutcome.NeedsFirstConnectionChoice) archive.engine.sync(FirstConnectionChoice.USE_CLOUD)
-        publish(year)
+    private suspend fun sync(year: Int): SyncOutcome? {
+        var result: SyncOutcome? = null
+        guarded(year) { archive ->
+            val outcome = archive.engine.sync()
+            result = if (outcome is SyncOutcome.NeedsFirstConnectionChoice) {
+                archive.engine.sync(FirstConnectionChoice.USE_CLOUD)
+            } else {
+                outcome
+            }
+            publish(year)
+        }
+        return result
     }
 
     private suspend fun publish(year: Int) {

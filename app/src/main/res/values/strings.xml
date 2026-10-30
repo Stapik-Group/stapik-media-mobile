@@ -37,6 +37,9 @@
     <string name="media_archive_loading">Downloading the archive of %1$d…</string>
     <string name="media_archive_failed">Could not download the archive of %1$d.</string>
     <string name="media_unreadable_entries">Entries that could not be read and are skipped: %1$d</string>
+    <string name="media_sync_offline_network">No connection to the cloud. Showing the copy stored on this device</string>
+    <string name="media_sync_offline_server">The cloud is not responding. Showing the copy stored on this device</string>
+    <string name="media_sync_cloud_document_missing">The cloud has no data for this app. Showing the copy stored on this device</string>
 
 
 
