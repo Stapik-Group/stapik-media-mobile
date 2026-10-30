@@ -11,6 +11,26 @@ fun List<MediaEntry>.filteredFor(category: MediaCategory, filter: CategoryFilter
         .sortedWith(compareByDescending<MediaEntry> { it.consumed.year }.thenByDescending { it.consumed.month })
         .toList()
 
+data class KeyedEntry(val key: String, val entry: MediaEntry)
+
+fun List<MediaEntry>.withListKeys(): List<KeyedEntry> {
+    val used = HashSet<String>()
+    return map { entry ->
+        val base = entry.id.ifEmpty { "${entry.title}|${entry.consumed.year}|${entry.consumed.month}" }
+        KeyedEntry(uniqueKey(base, used), entry)
+    }
+}
+
+private fun uniqueKey(base: String, used: MutableSet<String>): String {
+    var key = base
+    var repeat = 1
+    while (!used.add(key)) {
+        repeat++
+        key = "$base#$repeat"
+    }
+    return key
+}
+
 fun List<MediaEntry>.availableYearsFor(category: MediaCategory, archiveYears: Set<Int>): List<Int> =
     (filter { it.category == category }.map { it.consumed.year } + archiveYears)
         .distinct()

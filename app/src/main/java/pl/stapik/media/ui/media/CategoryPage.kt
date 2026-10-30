@@ -90,7 +90,7 @@ fun CategoryPage(
         }
 
         is MediaUiState.Success -> {
-            val entries = state.entries.filteredFor(category, filter)
+            val entries = state.entries.filteredFor(category, filter).withListKeys()
             val years = state.entries.availableYearsFor(category, state.archiveYears)
             val archiveStatus = filter.year?.let { state.archiveStatus[it] }
 
@@ -148,8 +148,8 @@ fun CategoryPage(
                         item { Text(text = stringResource(R.string.media_no_entries), color = scheme.textMuted) }
                     }
 
-                    items(entries, key = { it.title + it.consumed.year + it.consumed.month }) { entry ->
-                        EntryCard(entry = entry, scheme = scheme, onClick = { onEntryClick(entry) })
+                    items(entries, key = { it.key }) { keyed ->
+                        EntryCard(entry = keyed.entry, scheme = scheme, onClick = { onEntryClick(keyed.entry) })
                     }
                 }
             }

@@ -10,7 +10,9 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonDecoder
 import kotlinx.serialization.json.JsonEncoder
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.jsonObject
@@ -24,6 +26,7 @@ data class MediaEntry(
     val releaseDate: ReleaseDate,
     val consumed: ConsumedDate,
     val details: MediaDetails,
+    val id: String = "",
 )
 
 object MediaEntrySerializer : KSerializer<MediaEntry> {
@@ -39,6 +42,7 @@ object MediaEntrySerializer : KSerializer<MediaEntry> {
             put("releaseDate", json.encodeToJsonElement(value.releaseDate))
             put("consumed", json.encodeToJsonElement(value.consumed))
             put("details", detailsToJson(value.details))
+            if (value.id.isNotEmpty()) put("id", value.id)
         }
         encoder.encodeJsonElement(obj)
     }
@@ -53,6 +57,7 @@ object MediaEntrySerializer : KSerializer<MediaEntry> {
             releaseDate = json.decodeFromJsonElement<ReleaseDate>(obj.getValue("releaseDate")),
             consumed = json.decodeFromJsonElement<ConsumedDate>(obj.getValue("consumed")),
             details = detailsFromJson(category, obj.getValue("details").jsonObject),
+            id = (obj["id"] as? JsonPrimitive)?.contentOrNull.orEmpty(),
         )
     }
 
