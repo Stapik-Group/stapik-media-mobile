@@ -28,13 +28,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import pl.stapik.common.presentation.SyncAction
+import pl.stapik.common.ui.sync.LoadErrorMessage
+import pl.stapik.common.ui.sync.SyncStatusBanner
 import pl.stapik.media.R
 import pl.stapik.media.data.model.MediaCategory
 import pl.stapik.media.data.model.MediaEntry
 import pl.stapik.media.ui.theme.RetroButton
 import pl.stapik.media.ui.theme.RetroColorScheme
+import pl.stapik.media.util.AppInfo
 import java.time.Month
 import java.time.format.TextStyle
 import java.util.Locale
@@ -52,7 +57,9 @@ fun CategoryPage(
     val uiState by viewModel.uiState.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
     val filters by viewModel.filters.collectAsState()
+    val syncState by viewModel.syncState.collectAsState()
     val filter = filters[category] ?: CategoryFilter.None
+    val uriHandler = LocalUriHandler.current
 
     when (val state = uiState) {
         is MediaUiState.Loading -> Box(modifier.fillMaxSize()) {
@@ -75,6 +82,10 @@ fun CategoryPage(
             modifier = modifier,
         )
 
+        is MediaUiState.LocalDataError -> Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            LoadErrorMessage(kind = state.kind, onDiscardLocal = viewModel::discardLocalAndResync)
+        }
+
         is MediaUiState.Success -> {
             val entries = state.entries.filteredFor(category, filter)
             val years = state.entries.availableYearsFor(category)
@@ -89,6 +100,20 @@ fun CategoryPage(
                     contentPadding = PaddingValues(12.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
+                    item {
+                        SyncStatusBanner(
+                            state = syncState,
+                            onAction = { action ->
+                                when (action) {
+                                    SyncAction.RETRY -> viewModel.refresh()
+                                    SyncAction.RECONNECT, SyncAction.ENTER_PASSPHRASE -> onNavigateToConnect()
+                                    SyncAction.UPDATE_APP -> uriHandler.openUri(AppInfo.RELEASES_URL)
+                                    SyncAction.CHOOSE_SOURCE, SyncAction.DISMISS -> Unit
+                                }
+                            },
+                        )
+                    }
+
                     if (state.isStale) {
                         item { StaleDataBanner(updatedAt = state.updatedAt, scheme = scheme) }
                     }

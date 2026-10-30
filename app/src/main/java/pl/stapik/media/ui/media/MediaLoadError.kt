@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import pl.stapik.common.i18n.Messages
-import pl.stapik.common.presentation.LoadErrorKind
 import pl.stapik.common.sync.CloudError
 import pl.stapik.common.sync.CloudException
 import pl.stapik.common.sync.SyncOutcome
@@ -18,8 +17,6 @@ sealed interface MediaLoadError {
 
     /** The cloud data cannot be read (encrypted, wrong passphrase, newer format); [messageKey] is a library message key. */
     data class Unreadable(val messageKey: String) : MediaLoadError
-
-    data class LocalUnreadable(val messageKey: String) : MediaLoadError
 
     data class Unknown(val message: String) : MediaLoadError
 }
@@ -55,20 +52,11 @@ private fun unreadableKey(kind: UnreadableKind): String = when (kind) {
     UnreadableKind.OTHER -> "sync.unreadable.other"
 }
 
-val LoadErrorKind.messageKey: String
-    get() = when (this) {
-        LoadErrorKind.CORRUPTED -> "load.error.corrupted"
-        LoadErrorKind.UNDECRYPTABLE -> "load.error.undecryptable"
-        LoadErrorKind.MODEL_MISMATCH -> "load.error.model_mismatch"
-        LoadErrorKind.UNKNOWN -> "load.error.unknown"
-    }
-
 @Composable
 fun MediaLoadError.toDisplayMessage(): String = when (this) {
     MediaLoadError.NoNetwork -> stringResource(R.string.error_no_network)
     MediaLoadError.Unauthorized -> stringResource(R.string.error_unauthorized)
     MediaLoadError.NotFound -> stringResource(R.string.error_not_found)
     is MediaLoadError.Unreadable -> Messages.text(LocalContext.current, messageKey)
-    is MediaLoadError.LocalUnreadable -> Messages.text(LocalContext.current, messageKey)
     is MediaLoadError.Unknown -> stringResource(R.string.error_unknown, message)
 }

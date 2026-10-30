@@ -48,6 +48,7 @@ datastore-preferences = { group = "androidx.datastore", name = "datastore-prefer
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
 ui-shell = { module = "pl.stapik.common:ui-shell" }
+ui-sync = { module = "pl.stapik.common:ui-sync" }
 ui-theme = { module = "pl.stapik.common:ui-theme" }
 
 [plugins]

@@ -84,6 +84,7 @@ dependencies {
     implementation(libs.core.sync)
     implementation(libs.core.theme)
     implementation(libs.ui.shell)
+    implementation(libs.ui.sync)
     implementation(libs.ui.theme)
 
     testImplementation(libs.junit)

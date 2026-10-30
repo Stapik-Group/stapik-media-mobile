@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import pl.stapik.common.presentation.DocumentController
 import pl.stapik.common.presentation.DocumentUiState
+import pl.stapik.common.presentation.SyncUiState
 import pl.stapik.common.sync.FirstConnectionChoice
 import pl.stapik.common.sync.SyncOutcome
 import pl.stapik.media.data.config.ApiConfigStorage
@@ -24,6 +25,8 @@ class MediaViewModel(
     private val _uiState = MutableStateFlow<MediaUiState>(MediaUiState.Loading)
     val uiState: StateFlow<MediaUiState> = _uiState.asStateFlow()
 
+    val syncState: StateFlow<SyncUiState> = controller.sync
+
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
 
@@ -34,7 +37,14 @@ class MediaViewModel(
         refresh()
     }
 
-    fun refresh(isPullToRefresh: Boolean = false) {
+    fun refresh(isPullToRefresh: Boolean = false) = launchUpdate(isPullToRefresh) {
+        controller.load()
+        if (controller.document.value is DocumentUiState.Error) null else synchronize()
+    }
+
+    fun discardLocalAndResync() = launchUpdate(isPullToRefresh = false) { controller.discardLocalAndResync() }
+
+    private fun launchUpdate(isPullToRefresh: Boolean, update: suspend () -> SyncOutcome?) {
         viewModelScope.launch {
             if (isPullToRefresh) {
                 _isRefreshing.value = true
@@ -48,8 +58,7 @@ class MediaViewModel(
                     return@launch
                 }
 
-                controller.load()
-                _uiState.value = stateAfter(synchronize())
+                _uiState.value = stateAfter(update())
             } catch (e: Exception) {
                 _uiState.value = MediaUiState.Error(e.toMediaLoadError())
             } finally {
@@ -67,11 +76,11 @@ class MediaViewModel(
         }
     }
 
-    private fun stateAfter(outcome: SyncOutcome): MediaUiState = when (val document = controller.document.value) {
+    private fun stateAfter(outcome: SyncOutcome?): MediaUiState = when (val document = controller.document.value) {
         DocumentUiState.Loading -> MediaUiState.Loading
-        is DocumentUiState.Error -> MediaUiState.Error(MediaLoadError.LocalUnreadable(document.kind.messageKey))
+        is DocumentUiState.Error -> MediaUiState.LocalDataError(document.kind)
         is DocumentUiState.Success -> {
-            val failure = outcome.toMediaLoadError()
+            val failure = outcome?.toMediaLoadError()
             val lastSynced = localSnapshot.value?.takeIf { it.everSynchronized }
             if (lastSynced == null) {
                 MediaUiState.Error(failure ?: MediaLoadError.NotFound)
