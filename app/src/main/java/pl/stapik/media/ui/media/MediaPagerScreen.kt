@@ -25,8 +25,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,7 +49,7 @@ fun MediaPagerScreen(
     val categories = MediaCategory.entries
     val pagerState = rememberPagerState(pageCount = { categories.size })
     val scope = rememberCoroutineScope()
-    var detailEntry by remember { mutableStateOf<MediaEntry?>(null) }
+    var detailEntry by rememberSaveable(stateSaver = MediaEntryStateSaver) { mutableStateOf<MediaEntry?>(null) }
 
     // Covers both the system back button and the edge-swipe back gesture.
     BackHandler(enabled = detailEntry != null) { detailEntry = null }

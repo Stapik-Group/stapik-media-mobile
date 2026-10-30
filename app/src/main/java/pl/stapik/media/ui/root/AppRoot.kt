@@ -15,6 +15,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -53,7 +54,7 @@ fun AppRoot(
     viewModel: MediaViewModel,
     newConnectController: (CloudConfig?) -> ConnectController,
 ) {
-    var screen by remember { mutableStateOf<AppScreen>(AppScreen.Media) }
+    var screen by rememberSaveable { mutableStateOf(AppScreen.Media) }
     var savedConfig by remember { mutableStateOf<ApiConfig?>(null) }
     var currentTheme by remember { mutableStateOf(ThemeId.CLASSIC) }
     val scope = rememberCoroutineScope()
@@ -76,14 +77,14 @@ fun AppRoot(
         ) { innerPadding ->
             Box(modifier = Modifier.fillMaxSize().padding(innerPadding).consumeWindowInsets(innerPadding)) {
                 when (screen) {
-                    is AppScreen.Media -> MediaPagerScreen(
+                    AppScreen.Media -> MediaPagerScreen(
                         viewModel = viewModel,
                         scheme = scheme,
                         onNavigateToConnect = { screen = AppScreen.Settings },
                         modifier = Modifier.fillMaxSize(),
                     )
 
-                    is AppScreen.Settings -> {
+                    AppScreen.Settings -> {
                         val connectController = remember {
                             newConnectController(savedConfig?.let { CloudConfig(it.serverUrl, it.apiKey, it.passphrase) })
                         }
