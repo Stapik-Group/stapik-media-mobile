@@ -197,4 +197,74 @@ class MediaLibraryTest {
         assertEquals(16, id.length)
         assertTrue(id.all { it in '0'..'9' || it in 'a'..'f' })
     }
+
+    @Test
+    fun theSnapshotCollectsEveryLoadedDocumentAndNamesTheArchivesThatAreNotLoaded() = runBlocking {
+        main.payload = MediaPayload(listOf(entry("Dune", id = "a")))
+        archives.editors[2024] = FakeEditor(MediaPayload(listOf(entry("Arrival", consumedYear = 2024, id = "b"))))
+        archives.remote = setOf(2023, 2024)
+
+        val snapshot = library.snapshot()
+
+        assertEquals(listOf("Dune", "Arrival"), snapshot.payload.entries.map { it.title })
+        assertEquals(setOf(2023), snapshot.unavailableYears)
+    }
+
+    @Test
+    fun noArchiveIsUnavailableWithoutAConnection() = runBlocking {
+        archives.remote = setOf(2023)
+        connected = false
+
+        assertTrue(library.snapshot().unavailableYears.isEmpty())
+    }
+
+    @Test
+    fun replacingAllRoutesEntriesByYearAndEmptiesLoadedArchivesThatReceiveNothing() = runBlocking {
+        main.payload = MediaPayload(listOf(entry("Old", id = "o1")))
+        archives.editors[2022] = FakeEditor(MediaPayload(listOf(entry("Gone", consumedYear = 2022, id = "o2"))))
+
+        val report = library.replaceAll(
+            MediaPayload(listOf(entry("New", id = "n1"), entry("Arrival", consumedYear = 2024, id = "n2"))),
+        )
+
+        assertEquals(listOf("New"), main.payload.entries.map { it.title })
+        assertEquals(listOf("Arrival"), archives.editors.getValue(2024).payload.entries.map { it.title })
+        assertTrue(archives.editors.getValue(2022).payload.entries.isEmpty())
+        assertEquals(2, report.applied)
+        assertEquals(0, report.skipped)
+    }
+
+    @Test
+    fun replacingAllSkipsEntriesOfCloudArchivesThatAreNotLoaded() = runBlocking {
+        archives.remote = setOf(2023)
+
+        val report = library.replaceAll(
+            MediaPayload(listOf(entry("Kept"), entry("Skipped", consumedYear = 2023), entry("Skipped too", consumedYear = 2023))),
+        )
+
+        assertEquals(listOf("Kept"), main.payload.entries.map { it.title })
+        assertTrue(2023 !in archives.editors)
+        assertEquals(1, report.applied)
+        assertEquals(mapOf(2023 to 2), report.skippedByYear)
+        assertEquals(2, report.skipped)
+    }
+
+    @Test
+    fun replacingAllGivesNewIdsToEntriesWithoutOneAndToRepeatedOnes() = runBlocking {
+        library.replaceAll(MediaPayload(listOf(entry("A", id = "same"), entry("B", id = "same"), entry("C"))))
+
+        val ids = main.payload.entries.map { it.id }
+        assertEquals("same", ids[0])
+        assertEquals(3, ids.toSet().size)
+        assertTrue(ids.none { it.isEmpty() })
+    }
+
+    @Test
+    fun replacingAllKeepsTheUnreadableEntriesOfTheImportInTheMainDocument() = runBlocking {
+        val raw = JsonObject(mapOf("title" to JsonPrimitive("broken")))
+
+        library.replaceAll(MediaPayload(listOf(entry("A")), listOf(raw)))
+
+        assertEquals(listOf(raw), main.payload.unreadable)
+    }
 }

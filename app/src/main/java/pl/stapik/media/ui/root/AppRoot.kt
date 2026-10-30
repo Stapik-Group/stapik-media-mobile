@@ -24,6 +24,7 @@ import kotlinx.coroutines.launch
 import pl.stapik.media.R
 import pl.stapik.media.data.config.ApiConfig
 import pl.stapik.media.data.config.ApiConfigStorage
+import pl.stapik.media.ui.backup.BackupSection
 import pl.stapik.media.ui.media.MediaPagerScreen
 import pl.stapik.media.ui.media.MediaViewModel
 import pl.stapik.media.ui.theme.ThemePreferenceStorage
@@ -112,6 +113,7 @@ fun AppRoot(
                             },
                             onClose = { screen = AppScreen.Media },
                             modifier = Modifier.fillMaxSize(),
+                            extra = { BackupSection(viewModel.backup) },
                         )
                     }
                 }

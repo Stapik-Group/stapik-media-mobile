@@ -42,6 +42,45 @@ class MediaLibrary(
         return WriteResult.Done(location.entry)
     }
 
+    suspend fun snapshot(): LibrarySnapshot {
+        val payloads = listOf(main.current()) + archives.loadedYears().sorted().map { archives.editorFor(it).current() }
+        val everything = MediaPayload(
+            entries = payloads.flatMap { it.entries },
+            unreadable = payloads.flatMap { it.unreadable },
+        )
+        val unavailable = if (isConnected()) archives.remoteYears().orEmpty() - archives.loadedYears() else emptySet()
+        return LibrarySnapshot(everything, unavailable)
+    }
+
+    suspend fun replaceAll(imported: MediaPayload): ReplaceReport {
+        val byYear = withUniqueIds(imported.entries).groupBy { archiveYearOf(it) }
+        val skipped = byYear.keys.filterNotNull().filterNot { canWriteYear(it) }.toSet()
+        val years = archives.loadedYears() + byYear.keys.filterNotNull() - skipped
+        for (year in years) {
+            archives.editorFor(year).edit { MediaPayload(entries = byYear[year].orEmpty()) }
+        }
+        main.edit { MediaPayload(entries = byYear[null].orEmpty(), unreadable = imported.unreadable) }
+        return ReplaceReport(
+            applied = byYear.filterKeys { it !in skipped }.values.sumOf { it.size },
+            skippedByYear = skipped.associateWith { byYear.getValue(it).size },
+        )
+    }
+
+    private fun withUniqueIds(entries: List<MediaEntry>): List<MediaEntry> {
+        val seen = HashSet<String>()
+        return entries.map { entry ->
+            val id = if (entry.id.isNotEmpty() && entry.id !in seen) entry.id else freshId(seen)
+            seen.add(id)
+            entry.copy(id = id)
+        }
+    }
+
+    private fun freshId(taken: Set<String>): String {
+        var id = newId()
+        while (id in taken) id = newId()
+        return id
+    }
+
     private suspend fun refusalFor(entry: MediaEntry, existing: List<MediaEntry>): WriteRefusal? {
         EntryRules.problemWith(entry)?.let { return WriteRefusal.Invalid(it) }
         if (EntryRules.isDuplicate(entry, existing)) return WriteRefusal.Duplicate
