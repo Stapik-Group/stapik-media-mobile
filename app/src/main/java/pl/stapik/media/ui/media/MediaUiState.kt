@@ -11,6 +11,7 @@ sealed interface MediaUiState {
         val entries: List<MediaEntry>,
         val isStale: Boolean,
         val updatedAt: String,
+        val archiveYears: Set<Int> = emptySet(),
     ) : MediaUiState
 
     data class Error(val error: MediaLoadError) : MediaUiState

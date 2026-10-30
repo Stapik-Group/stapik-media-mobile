@@ -88,7 +88,7 @@ fun CategoryPage(
 
         is MediaUiState.Success -> {
             val entries = state.entries.filteredFor(category, filter)
-            val years = state.entries.availableYearsFor(category)
+            val years = state.entries.availableYearsFor(category, state.archiveYears)
 
             PullToRefreshBox(
                 isRefreshing = isRefreshing,

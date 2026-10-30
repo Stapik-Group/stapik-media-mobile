@@ -15,6 +15,7 @@ import pl.stapik.common.model.SlotKey
 import pl.stapik.common.presentation.ConnectController
 import pl.stapik.common.presentation.DocumentController
 import pl.stapik.common.sync.SyncEngine
+import pl.stapik.media.data.archive.MediaArchives
 import pl.stapik.media.data.cloud.CloudGatewayProvider
 import pl.stapik.media.data.config.ApiConfig
 import pl.stapik.media.data.config.ApiConfigStorage
@@ -32,14 +33,13 @@ class AppContainer(context: Context) {
     private val connectionStorage = ConnectionApiConfigStorage(appContext)
     private val transport = OkHttpTransport()
     private val slot = SlotKey(ApiConfig.SLOT_KEY)
+    private val dataDirectory = appContext.stapikDataDirectory().toPath()
+    private val documentCipher = KeystoreCiphers.create(DOCUMENT_KEY_ALIAS)
     private val documentStore = TrackingDocumentStore(
-        FileDocumentStore(
-            directory = appContext.stapikDataDirectory().toPath(),
-            slot = slot,
-            cipher = KeystoreCiphers.create(DOCUMENT_KEY_ALIAS),
-        ),
+        FileDocumentStore(directory = dataDirectory, slot = slot, cipher = documentCipher),
     )
     private val gateways = CloudGatewayProvider(connectionStorage, transport)
+    private val archives = MediaArchives(dataDirectory, slot, documentCipher, gateways, Clock.systemUTC())
     private val engine = SyncEngine(slot, MediaDocumentCodec.codec, documentStore, gateways::current, Clock.systemUTC())
 
     val configStorage: ApiConfigStorage = connectionStorage
@@ -60,7 +60,7 @@ class AppContainer(context: Context) {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
             val controller = DocumentController(engine = engine) { configStorage.load() != null }
-            return MediaViewModel(controller, documentStore.snapshot, configStorage) as T
+            return MediaViewModel(controller, documentStore.snapshot, archives, configStorage) as T
         }
     }
 

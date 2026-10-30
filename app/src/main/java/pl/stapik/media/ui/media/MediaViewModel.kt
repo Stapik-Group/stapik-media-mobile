@@ -3,14 +3,18 @@ package pl.stapik.media.ui.media
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import pl.stapik.common.presentation.DocumentController
 import pl.stapik.common.presentation.DocumentUiState
 import pl.stapik.common.presentation.SyncUiState
 import pl.stapik.common.sync.FirstConnectionChoice
 import pl.stapik.common.sync.SyncOutcome
+import pl.stapik.media.data.archive.MediaArchives
 import pl.stapik.media.data.config.ApiConfigStorage
 import pl.stapik.media.data.document.LocalSnapshot
 import pl.stapik.media.data.model.MediaCategory
@@ -19,11 +23,19 @@ import pl.stapik.media.data.serialization.MediaPayload
 class MediaViewModel(
     private val controller: DocumentController<MediaPayload>,
     private val localSnapshot: StateFlow<LocalSnapshot?>,
+    private val archives: MediaArchives,
     private val configStorage: ApiConfigStorage,
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<MediaUiState>(MediaUiState.Loading)
-    val uiState: StateFlow<MediaUiState> = _uiState.asStateFlow()
+    private val baseState = MutableStateFlow<MediaUiState>(MediaUiState.Loading)
+
+    val uiState: StateFlow<MediaUiState> = combine(baseState, archives.entries, archives.years) { state, archived, years ->
+        if (state is MediaUiState.Success) {
+            state.copy(entries = state.entries + archived.values.flatten(), archiveYears = years)
+        } else {
+            state
+        }
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, MediaUiState.Loading)
 
     val syncState: StateFlow<SyncUiState> = controller.sync
 
@@ -34,6 +46,7 @@ class MediaViewModel(
     val filters: StateFlow<Map<MediaCategory, CategoryFilter>> = _filters.asStateFlow()
 
     init {
+        viewModelScope.launch { archives.restoreLocal() }
         refresh()
     }
 
@@ -49,18 +62,21 @@ class MediaViewModel(
             if (isPullToRefresh) {
                 _isRefreshing.value = true
             } else {
-                _uiState.value = MediaUiState.Loading
+                baseState.value = MediaUiState.Loading
             }
 
             try {
                 if (configStorage.load() == null) {
-                    _uiState.value = MediaUiState.NotConnected
+                    baseState.value = MediaUiState.NotConnected
                     return@launch
                 }
 
-                _uiState.value = stateAfter(update())
+                val state = stateAfter(update())
+                if (state is MediaUiState.Success) archives.refreshYears()
+                baseState.value = state
+                if (state is MediaUiState.Success) archives.syncLoaded()
             } catch (e: Exception) {
-                _uiState.value = MediaUiState.Error(e.toMediaLoadError())
+                baseState.value = MediaUiState.Error(e.toMediaLoadError())
             } finally {
                 _isRefreshing.value = false
             }
@@ -93,6 +109,11 @@ class MediaViewModel(
     fun setYearFilter(category: MediaCategory, year: Int?) {
         val current = _filters.value[category] ?: CategoryFilter.None
         _filters.value += (category to current.copy(year = year, month = null))
+        year?.let(::requestArchive)
+    }
+
+    private fun requestArchive(year: Int) {
+        viewModelScope.launch { archives.request(year) }
     }
 
     fun setMonthFilter(category: MediaCategory, month: Int?) {

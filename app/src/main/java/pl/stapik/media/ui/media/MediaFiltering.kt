@@ -11,8 +11,7 @@ fun List<MediaEntry>.filteredFor(category: MediaCategory, filter: CategoryFilter
         .sortedWith(compareByDescending<MediaEntry> { it.consumed.year }.thenByDescending { it.consumed.month })
         .toList()
 
-fun List<MediaEntry>.availableYearsFor(category: MediaCategory): List<Int> =
-    filter { it.category == category }
-        .map { it.consumed.year }
+fun List<MediaEntry>.availableYearsFor(category: MediaCategory, archiveYears: Set<Int>): List<Int> =
+    (filter { it.category == category }.map { it.consumed.year } + archiveYears)
         .distinct()
         .sortedDescending()
