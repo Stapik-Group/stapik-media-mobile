@@ -2,17 +2,22 @@ package pl.stapik.media.ui.media
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import pl.stapik.media.data.config.ApiConfigStorage
-import pl.stapik.media.data.model.MediaCategory
-import pl.stapik.media.data.repository.MediaFetchOutcome
-import pl.stapik.media.data.repository.MediaRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import pl.stapik.common.presentation.DocumentController
+import pl.stapik.common.presentation.DocumentUiState
+import pl.stapik.common.sync.FirstConnectionChoice
+import pl.stapik.common.sync.SyncOutcome
+import pl.stapik.media.data.config.ApiConfigStorage
+import pl.stapik.media.data.document.LocalSnapshot
+import pl.stapik.media.data.model.MediaCategory
+import pl.stapik.media.data.serialization.MediaPayload
 
 class MediaViewModel(
-    private val repository: MediaRepository,
+    private val controller: DocumentController<MediaPayload>,
+    private val localSnapshot: StateFlow<LocalSnapshot?>,
     private val configStorage: ApiConfigStorage,
 ) : ViewModel() {
 
@@ -38,13 +43,13 @@ class MediaViewModel(
             }
 
             try {
-                val config = configStorage.load()
-                if (config == null) {
+                if (configStorage.load() == null) {
                     _uiState.value = MediaUiState.NotConnected
                     return@launch
                 }
 
-                applyOutcome(repository.fetchEntries(config))
+                controller.load()
+                _uiState.value = stateAfter(synchronize())
             } catch (e: Exception) {
                 _uiState.value = MediaUiState.Error(e.toMediaLoadError())
             } finally {
@@ -53,14 +58,26 @@ class MediaViewModel(
         }
     }
 
-    private fun applyOutcome(outcome: MediaFetchOutcome) {
-        _uiState.value = when (outcome) {
-            is MediaFetchOutcome.Fresh ->
-                MediaUiState.Success(outcome.entries, isStale = false, outcome.updatedAt)
-            is MediaFetchOutcome.Cached ->
-                MediaUiState.Success(outcome.entries, isStale = true, outcome.updatedAt)
-            is MediaFetchOutcome.Failure ->
-                MediaUiState.Error(outcome.cause.toMediaLoadError())
+    private suspend fun synchronize(): SyncOutcome {
+        val outcome = controller.sync()
+        return if (outcome is SyncOutcome.NeedsFirstConnectionChoice) {
+            controller.sync(FirstConnectionChoice.USE_CLOUD)
+        } else {
+            outcome
+        }
+    }
+
+    private fun stateAfter(outcome: SyncOutcome): MediaUiState = when (val document = controller.document.value) {
+        DocumentUiState.Loading -> MediaUiState.Loading
+        is DocumentUiState.Error -> MediaUiState.Error(MediaLoadError.LocalUnreadable(document.kind.messageKey))
+        is DocumentUiState.Success -> {
+            val failure = outcome.toMediaLoadError()
+            val lastSynced = localSnapshot.value?.takeIf { it.everSynchronized }
+            if (lastSynced == null) {
+                MediaUiState.Error(failure ?: MediaLoadError.NotFound)
+            } else {
+                MediaUiState.Success(document.value.entries, isStale = failure != null, updatedAt = lastSynced.lastUpdate)
+            }
         }
     }
 

@@ -76,6 +76,7 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.core.cloud)
     implementation(libs.core.crypto)
+    implementation(libs.core.document)
     implementation(libs.core.i18n)
     implementation(libs.core.model)
     implementation(libs.core.presentation)

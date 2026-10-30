@@ -6,7 +6,6 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.preferencesDataStore
-import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -22,6 +21,7 @@ import pl.stapik.common.settings.ConnectionConfigStore
 import pl.stapik.common.settings.LegacyFormat
 import pl.stapik.common.settings.LegacyPrefsConfigReader
 import pl.stapik.common.settings.LegacyPrefsSource
+import pl.stapik.media.util.stapikDataDirectory
 
 interface ApiConfigStorage {
     suspend fun load(): ApiConfig?
@@ -49,7 +49,7 @@ private class DataStoreLegacySource(private val dataStore: DataStore<Preferences
 class ConnectionApiConfigStorage(context: Context) : ApiConfigStorage {
     /** Shared with the connect form's controller, so that both work on the same file. */
     val store = ConnectionConfigStore(
-        directory = File(context.applicationContext.filesDir, "stapik").toPath(),
+        directory = context.stapikDataDirectory().toPath(),
         cipher = KeystoreCiphers.create(KEY_ALIAS),
         schemaVersion = SCHEMA_VERSION,
         legacy = LegacyPrefsConfigReader(
