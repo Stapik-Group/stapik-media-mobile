@@ -21,13 +21,17 @@ import pl.stapik.common.sync.SyncOutcome
 import pl.stapik.media.data.archive.MediaArchives
 import pl.stapik.media.data.config.ApiConfigStorage
 import pl.stapik.media.data.document.LocalSnapshot
+import pl.stapik.media.data.library.MediaLibrary
+import pl.stapik.media.data.library.WriteResult
 import pl.stapik.media.data.model.MediaCategory
+import pl.stapik.media.data.model.MediaEntry
 import pl.stapik.media.data.serialization.MediaPayload
 
 class MediaViewModel(
     private val controller: DocumentController<MediaPayload>,
     private val localSnapshot: StateFlow<LocalSnapshot?>,
     private val archives: MediaArchives,
+    private val library: MediaLibrary,
     private val configStorage: ApiConfigStorage,
     private val resumeThrottle: RefreshThrottle,
     private val sortStorage: SortPreferenceStorage,
@@ -126,6 +130,24 @@ class MediaViewModel(
                 resumeThrottle.markRefreshed()
             }
         }
+    }
+
+    suspend fun addEntry(entry: MediaEntry): WriteResult = written { library.add(entry) }
+
+    suspend fun updateEntry(id: String, entry: MediaEntry): WriteResult = written { library.update(id, entry) }
+
+    suspend fun deleteEntry(id: String): WriteResult = written { library.delete(id) }
+
+    private suspend fun written(write: suspend () -> WriteResult): WriteResult {
+        val result = write()
+        val previous = baseState.value
+        val fresh = mediaUiStateFor(controller.document.value, localSnapshot.value, failure = null, connected = connected)
+        baseState.value = if (fresh is MediaUiState.Success && previous is MediaUiState.Success) {
+            fresh.copy(isStale = previous.isStale, refreshError = previous.refreshError)
+        } else {
+            fresh
+        }
+        return result
     }
 
     fun chooseFirstConnection(choice: FirstConnectionChoice) {

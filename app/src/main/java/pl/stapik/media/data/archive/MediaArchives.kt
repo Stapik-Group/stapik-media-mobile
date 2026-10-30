@@ -19,6 +19,8 @@ import pl.stapik.common.sync.SyncEngine
 import pl.stapik.common.sync.SyncOutcome
 import pl.stapik.media.data.cloud.CloudGatewayProvider
 import pl.stapik.media.data.document.TrackingDocumentStore
+import pl.stapik.media.data.library.ArchiveDirectory
+import pl.stapik.media.data.library.DocumentEditor
 import pl.stapik.media.data.serialization.MediaDocumentCodec
 import pl.stapik.media.data.serialization.MediaPayload
 
@@ -28,7 +30,7 @@ class MediaArchives(
     private val cipher: PayloadCipher,
     private val gateways: CloudGatewayProvider,
     private val clock: Clock,
-) {
+) : ArchiveDirectory {
     private class Archive(val engine: SyncEngine<MediaPayload>, val store: TrackingDocumentStore)
 
     private val archives = HashMap<Int, Archive>()
@@ -36,6 +38,7 @@ class MediaArchives(
     private val mutableDocuments = MutableStateFlow<Map<Int, MediaPayload>>(emptyMap())
     private val mutableYears = MutableStateFlow<Set<Int>>(emptySet())
     private val mutableStatus = MutableStateFlow<Map<Int, ArchiveStatus>>(emptyMap())
+    private var yearsKnown = false
 
     val documents: StateFlow<Map<Int, MediaPayload>> = mutableDocuments.asStateFlow()
     val years: StateFlow<Set<Int>> = mutableYears.asStateFlow()
@@ -45,8 +48,25 @@ class MediaArchives(
         storedYears().forEach { year -> guarded(year) { publish(year) } }
     }
 
+    override fun loadedYears(): Set<Int> = mutableDocuments.value.keys
+
+    override fun remoteYears(): Set<Int>? = mutableYears.value.takeIf { yearsKnown }
+
+    override fun editorFor(year: Int): DocumentEditor = object : DocumentEditor {
+        override suspend fun current(): MediaPayload = archiveFor(year).engine.load()
+
+        override suspend fun edit(transform: (MediaPayload) -> MediaPayload) {
+            archiveFor(year).engine.edit(transform)
+            publish(year)
+        }
+    }
+
     suspend fun refreshYears() {
-        val gateway = gateways.current() ?: return
+        val gateway = gateways.current()
+        if (gateway == null) {
+            yearsKnown = false
+            return
+        }
         val remote = try {
             gateway.partitions(slot).mapNotNull { ArchiveYears.yearOf(it.partition) }.toSet()
         } catch (e: CancellationException) {
@@ -56,7 +76,8 @@ class MediaArchives(
             return
         }
         mutableYears.value = remote
-        (storedYears() - remote).forEach { forget(it) }
+        yearsKnown = true
+        (storedYears() - remote).filter { isSettled(it) }.forEach { forget(it) }
     }
 
     suspend fun syncLoaded() {
@@ -92,10 +113,24 @@ class MediaArchives(
     private suspend fun publish(year: Int) {
         val archive = archiveFor(year)
         val payload = archive.engine.load()
-        if (archive.store.snapshot.value?.everSynchronized == true) {
+        if (archive.store.snapshot.value?.everSynchronized == true || !MediaDocumentCodec.codec.isEmpty(payload)) {
             mutableDocuments.update { it + (year to payload) }
+        } else {
+            mutableDocuments.update { it - year }
         }
     }
+
+    private suspend fun isSettled(year: Int): Boolean =
+        try {
+            val archive = archiveFor(year)
+            archive.engine.load()
+            val snapshot = archive.store.snapshot.value
+            snapshot != null && snapshot.everSynchronized && !snapshot.dirty
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            true
+        }
 
     private suspend fun guarded(year: Int, action: suspend (Archive) -> Unit) {
         try {

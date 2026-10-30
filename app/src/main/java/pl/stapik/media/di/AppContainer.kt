@@ -22,6 +22,9 @@ import pl.stapik.media.data.config.ApiConfig
 import pl.stapik.media.data.config.ApiConfigStorage
 import pl.stapik.media.data.config.ConnectionApiConfigStorage
 import pl.stapik.media.data.document.TrackingDocumentStore
+import pl.stapik.media.data.library.ControllerDocumentEditor
+import pl.stapik.media.data.library.MediaLibrary
+import pl.stapik.media.data.library.newEntryId
 import pl.stapik.media.data.serialization.MediaDocumentCodec
 import pl.stapik.media.ui.media.DataStoreSortPreferenceStorage
 import pl.stapik.media.ui.media.MediaViewModel
@@ -65,10 +68,18 @@ class AppContainer(context: Context) {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
             val controller = DocumentController(engine = engine) { configStorage.load() != null }
+            val library = MediaLibrary(
+                main = ControllerDocumentEditor(controller, engine),
+                archives = archives,
+                clock = Clock.systemDefaultZone(),
+                newId = ::newEntryId,
+                isConnected = { configStorage.load() != null },
+            )
             return MediaViewModel(
                 controller,
                 documentStore.snapshot,
                 archives,
+                library,
                 configStorage,
                 RefreshThrottle(FOREGROUND_REFRESH_INTERVAL_MILLIS, SystemClock::elapsedRealtime),
                 sortStorage,

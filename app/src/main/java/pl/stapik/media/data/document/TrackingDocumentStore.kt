@@ -8,7 +8,7 @@ import pl.stapik.common.model.LocalDocument
 import pl.stapik.common.sync.ConflictCopy
 import pl.stapik.common.sync.DocumentStore
 
-data class LocalSnapshot(val lastUpdate: String, val everSynchronized: Boolean)
+data class LocalSnapshot(val lastUpdate: String, val everSynchronized: Boolean, val dirty: Boolean = false)
 
 class TrackingDocumentStore(private val delegate: DocumentStore) : DocumentStore {
     private val mutableSnapshot = MutableStateFlow<LocalSnapshot?>(null)
@@ -30,6 +30,6 @@ class TrackingDocumentStore(private val delegate: DocumentStore) : DocumentStore
     }
 
     private fun track(document: LocalDocument<DocumentEnvelope>?) {
-        mutableSnapshot.value = document?.let { LocalSnapshot(it.content.lastUpdate, it.everSynchronized) }
+        mutableSnapshot.value = document?.let { LocalSnapshot(it.content.lastUpdate, it.everSynchronized, it.dirty) }
     }
 }
