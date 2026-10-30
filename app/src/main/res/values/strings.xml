@@ -36,6 +36,7 @@
     <string name="media_stale_banner">Showing cached data from %1$s</string>
     <string name="media_archive_loading">Downloading the archive of %1$d…</string>
     <string name="media_archive_failed">Could not download the archive of %1$d.</string>
+    <string name="media_unreadable_entries">Entries that could not be read and are skipped: %1$d</string>
 
 
 

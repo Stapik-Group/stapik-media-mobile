@@ -122,6 +122,15 @@ fun CategoryPage(
                         item { StaleDataBanner(updatedAt = state.updatedAt, scheme = scheme) }
                     }
 
+                    if (state.unreadableEntries > 0) {
+                        item {
+                            NoticeBanner(
+                                text = stringResource(R.string.media_unreadable_entries, state.unreadableEntries),
+                                scheme = scheme,
+                            )
+                        }
+                    }
+
                     item {
                         FilterBar(
                             years = years,
@@ -159,8 +168,13 @@ fun CategoryPage(
 
 @Composable
 private fun StaleDataBanner(updatedAt: String, scheme: RetroColorScheme) {
+    NoticeBanner(text = stringResource(R.string.media_stale_banner, formatUpdatedAt(updatedAt)), scheme = scheme)
+}
+
+@Composable
+private fun NoticeBanner(text: String, scheme: RetroColorScheme) {
     Text(
-        text = stringResource(R.string.media_stale_banner, formatUpdatedAt(updatedAt)),
+        text = text,
         color = scheme.textDark,
         modifier = Modifier
             .fillMaxWidth()

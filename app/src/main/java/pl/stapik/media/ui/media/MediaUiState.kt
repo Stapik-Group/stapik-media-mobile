@@ -14,6 +14,7 @@ sealed interface MediaUiState {
         val updatedAt: String,
         val archiveYears: Set<Int> = emptySet(),
         val archiveStatus: Map<Int, ArchiveStatus> = emptyMap(),
+        val unreadableEntries: Int = 0,
     ) : MediaUiState
 
     data class Error(val error: MediaLoadError) : MediaUiState

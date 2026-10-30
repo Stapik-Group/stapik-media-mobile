@@ -36,6 +36,7 @@
     <string name="media_stale_banner">Dane z pamięci podręcznej z %1$s</string>
     <string name="media_archive_loading">Pobieranie archiwum z roku %1$d…</string>
     <string name="media_archive_failed">Nie udało się pobrać archiwum z roku %1$d.</string>
+    <string name="media_unreadable_entries">Pominięte wpisy, których nie udało się odczytać: %1$d</string>
 
 
 

@@ -29,9 +29,14 @@ class MediaViewModel(
 
     private val baseState = MutableStateFlow<MediaUiState>(MediaUiState.Loading)
 
-    val uiState: StateFlow<MediaUiState> = combine(baseState, archives.entries, archives.years, archives.status) { state, archived, years, status ->
+    val uiState: StateFlow<MediaUiState> = combine(baseState, archives.documents, archives.years, archives.status) { state, archived, years, status ->
         if (state is MediaUiState.Success) {
-            state.copy(entries = state.entries + archived.values.flatten(), archiveYears = years, archiveStatus = status)
+            state.copy(
+                entries = state.entries + archived.values.flatMap { it.entries },
+                unreadableEntries = state.unreadableEntries + archived.values.sumOf { it.unreadableEntries },
+                archiveYears = years,
+                archiveStatus = status,
+            )
         } else {
             state
         }
@@ -101,7 +106,12 @@ class MediaViewModel(
             if (lastSynced == null) {
                 MediaUiState.Error(failure ?: MediaLoadError.NotFound)
             } else {
-                MediaUiState.Success(document.value.entries, isStale = failure != null, updatedAt = lastSynced.lastUpdate)
+                MediaUiState.Success(
+                    entries = document.value.entries,
+                    isStale = failure != null,
+                    updatedAt = lastSynced.lastUpdate,
+                    unreadableEntries = document.value.unreadableEntries,
+                )
             }
         }
     }

@@ -19,7 +19,6 @@ import pl.stapik.common.sync.SyncEngine
 import pl.stapik.common.sync.SyncOutcome
 import pl.stapik.media.data.cloud.CloudGatewayProvider
 import pl.stapik.media.data.document.TrackingDocumentStore
-import pl.stapik.media.data.model.MediaEntry
 import pl.stapik.media.data.serialization.MediaDocumentCodec
 import pl.stapik.media.data.serialization.MediaPayload
 
@@ -34,11 +33,11 @@ class MediaArchives(
 
     private val archives = HashMap<Int, Archive>()
     private val storedFileName = Regex("${Regex.escape(slot.value)}@(\\d{4})\\.doc")
-    private val mutableEntries = MutableStateFlow<Map<Int, List<MediaEntry>>>(emptyMap())
+    private val mutableDocuments = MutableStateFlow<Map<Int, MediaPayload>>(emptyMap())
     private val mutableYears = MutableStateFlow<Set<Int>>(emptySet())
     private val mutableStatus = MutableStateFlow<Map<Int, ArchiveStatus>>(emptyMap())
 
-    val entries: StateFlow<Map<Int, List<MediaEntry>>> = mutableEntries.asStateFlow()
+    val documents: StateFlow<Map<Int, MediaPayload>> = mutableDocuments.asStateFlow()
     val years: StateFlow<Set<Int>> = mutableYears.asStateFlow()
     val status: StateFlow<Map<Int, ArchiveStatus>> = mutableStatus.asStateFlow()
 
@@ -61,11 +60,11 @@ class MediaArchives(
     }
 
     suspend fun syncLoaded() {
-        mutableEntries.value.keys.forEach { sync(it) }
+        mutableDocuments.value.keys.forEach { sync(it) }
     }
 
     suspend fun request(year: Int) {
-        if (year in mutableEntries.value || year !in mutableYears.value) return
+        if (year in mutableDocuments.value || year !in mutableYears.value) return
         mutableStatus.update { it + (year to ArchiveStatus.Loading) }
         try {
             sync(year)
@@ -73,7 +72,7 @@ class MediaArchives(
             mutableStatus.update { it - year }
             throw e
         }
-        mutableStatus.update { if (year in mutableEntries.value) it - year else it + (year to ArchiveStatus.Failed) }
+        mutableStatus.update { if (year in mutableDocuments.value) it - year else it + (year to ArchiveStatus.Failed) }
     }
 
     private suspend fun sync(year: Int) = guarded(year) { archive ->
@@ -86,7 +85,7 @@ class MediaArchives(
         val archive = archiveFor(year)
         val payload = archive.engine.load()
         if (archive.store.snapshot.value?.everSynchronized == true) {
-            mutableEntries.update { it + (year to payload.entries) }
+            mutableDocuments.update { it + (year to payload) }
         }
     }
 
@@ -105,7 +104,7 @@ class MediaArchives(
 
     private suspend fun forget(year: Int) {
         archiveFor(year).engine.discardLocalDocument()
-        mutableEntries.update { it - year }
+        mutableDocuments.update { it - year }
     }
 
     private suspend fun storedYears(): Set<Int> = withContext(Dispatchers.IO) {
