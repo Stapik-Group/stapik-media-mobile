@@ -18,7 +18,7 @@ class CloudGatewayProvider(
     @Synchronized
     private fun gatewayFor(config: ApiConfig): CloudGateway {
         gateway?.let { (known, ready) -> if (known == config) return ready }
-        val created = HttpCloudGateway(CloudConfig(config.serverUrl, config.apiKey, config.passphrase), transport)
+        val created = ReadOnlyCloudGateway(HttpCloudGateway(CloudConfig(config.serverUrl, config.apiKey, config.passphrase), transport))
         gateway = config to created
         return created
     }
