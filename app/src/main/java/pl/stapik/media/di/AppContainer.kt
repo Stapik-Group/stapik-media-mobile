@@ -1,6 +1,7 @@
 package pl.stapik.media.di
 
 import android.content.Context
+import android.os.SystemClock
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.CreationExtras
@@ -23,6 +24,7 @@ import pl.stapik.media.data.config.ConnectionApiConfigStorage
 import pl.stapik.media.data.document.TrackingDocumentStore
 import pl.stapik.media.data.serialization.MediaDocumentCodec
 import pl.stapik.media.ui.media.MediaViewModel
+import pl.stapik.media.ui.media.RefreshThrottle
 import pl.stapik.media.ui.theme.DataStoreThemePreferenceStorage
 import pl.stapik.media.ui.theme.ThemePreferenceStorage
 import pl.stapik.media.util.stapikDataDirectory
@@ -60,11 +62,18 @@ class AppContainer(context: Context) {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
             val controller = DocumentController(engine = engine) { configStorage.load() != null }
-            return MediaViewModel(controller, documentStore.snapshot, archives, configStorage) as T
+            return MediaViewModel(
+                controller,
+                documentStore.snapshot,
+                archives,
+                configStorage,
+                RefreshThrottle(FOREGROUND_REFRESH_INTERVAL_MILLIS, SystemClock::elapsedRealtime),
+            ) as T
         }
     }
 
     private companion object {
+        const val FOREGROUND_REFRESH_INTERVAL_MILLIS = 60_000L
         const val DOCUMENT_KEY_ALIAS = "stapikmedia_data_key"
         const val OBSOLETE_CACHE_PATH = "datastore/media_cache.preferences_pb"
     }

@@ -3,6 +3,7 @@ package pl.stapik.media.ui.media
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -27,6 +28,7 @@ class MediaViewModel(
     private val localSnapshot: StateFlow<LocalSnapshot?>,
     private val archives: MediaArchives,
     private val configStorage: ApiConfigStorage,
+    private val resumeThrottle: RefreshThrottle,
 ) : ViewModel() {
 
     private val baseState = MutableStateFlow<MediaUiState>(MediaUiState.Loading)
@@ -61,13 +63,29 @@ class MediaViewModel(
 
     fun refresh(isPullToRefresh: Boolean = false) = launchUpdate(isPullToRefresh) {
         controller.load()
+        if (!isPullToRefresh) showStoredCopy()
         if (controller.document.value is DocumentUiState.Error) null else synchronize()
+    }
+
+    fun refreshOnForeground() {
+        if (updateJob?.isActive == true || !resumeThrottle.isDue()) return
+        refresh(isPullToRefresh = true)
     }
 
     fun discardLocalAndResync() = launchUpdate(isPullToRefresh = false) { controller.discardLocalAndResync() }
 
+    private var updateJob: Job? = null
+
+    private fun showStoredCopy() {
+        val state = mediaUiStateFor(controller.document.value, localSnapshot.value, failure = null)
+        if (state is MediaUiState.Success) {
+            baseState.value = state
+            _isRefreshing.value = true
+        }
+    }
+
     private fun launchUpdate(isPullToRefresh: Boolean, update: suspend () -> SyncOutcome?) {
-        viewModelScope.launch {
+        updateJob = viewModelScope.launch {
             if (isPullToRefresh) {
                 _isRefreshing.value = true
             } else {
@@ -90,6 +108,7 @@ class MediaViewModel(
                 baseState.value = stateAfterFailure(e)
             } finally {
                 _isRefreshing.value = false
+                resumeThrottle.markRefreshed()
             }
         }
     }

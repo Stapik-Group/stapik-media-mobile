@@ -11,7 +11,7 @@ A read-only mobile companion to [Stapik Media](https://github.com/Stapik-Group/s
 - **Offline copy** – the last synchronised log is kept on the device, encrypted with a key from the Android Keystore, with a banner showing when you're looking at stored data and from when
 - **Sync status** – a banner explains why the data may be out of date (no network, rejected key, unreadable cloud data) and offers the matching action
 - **Recovery** – if the copy on the device cannot be read, the app offers to discard it and download the log from the cloud again
-- **Pull-to-refresh** – drag down to fetch the latest data on demand without losing scroll position
+- **Refresh** – the stored copy appears at once while the latest data is fetched; drag down to refresh on demand without losing scroll position, and the log also refreshes when you return to the app after a minute
 - **Themes** – Classic, Classic Pink, Modern, Dark and Neoclassic, matching the desktop app, applied consistently across every screen
 - **Encrypted connection config** – server URL and API key are encrypted with a key held in the Android Keystore before being stored on device; the API key is masked on screen with a show/hide toggle
 - **End-to-end encryption** – an optional passphrase reads cloud data that the desktop app encrypted (`stapik-e2e`)

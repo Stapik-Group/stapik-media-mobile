@@ -9,12 +9,14 @@ import pl.stapik.media.ui.media.MediaViewModel
 import pl.stapik.media.ui.root.AppRoot
 
 class MainActivity : ComponentActivity() {
+    private lateinit var viewModel: MediaViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
         val container = (application as MediaApp).container
-        val viewModel = ViewModelProvider(this, container.viewModelFactory)[MediaViewModel::class.java]
+        viewModel = ViewModelProvider(this, container.viewModelFactory)[MediaViewModel::class.java]
 
         setContent {
             AppRoot(
@@ -24,5 +26,10 @@ class MainActivity : ComponentActivity() {
                 newConnectController = container::newConnectController,
             )
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        viewModel.refreshOnForeground()
     }
 }
