@@ -24,6 +24,9 @@
 
     <string name="detail_back">Back</string>
     <string name="detail_release_date">Release date</string>
+    <string name="detail_rating">Rating</string>
+    <string name="detail_rating_value">%1$d/%2$d</string>
+    <string name="detail_note">Note</string>
     <string name="detail_director">Director</string>
     <string name="detail_genre">Genre</string>
     <string name="detail_author">Author</string>

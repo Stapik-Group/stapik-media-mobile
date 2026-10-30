@@ -1,5 +1,6 @@
 package pl.stapik.media.ui.media
 
+import kotlinx.serialization.json.JsonNull
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -11,7 +12,7 @@ import pl.stapik.media.data.serialization.MediaPayload
 
 class MediaUiStateFactoryTest {
     private val synchronizedCopy = LocalSnapshot(lastUpdate = "2026-10-30T10:00:00Z", everSynchronized = true)
-    private val loaded = DocumentUiState.Success(MediaPayload(unreadableEntries = 2))
+    private val loaded = DocumentUiState.Success(MediaPayload(unreadable = listOf(JsonNull, JsonNull)))
 
     @Test
     fun unreadableLocalDataWinsOverAnyFailure() {

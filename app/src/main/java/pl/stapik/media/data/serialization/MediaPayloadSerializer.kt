@@ -7,6 +7,7 @@ import kotlinx.serialization.descriptors.buildClassSerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonDecoder
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonEncoder
@@ -27,16 +28,20 @@ object MediaPayloadSerializer : KSerializer<MediaPayload> {
 
     override fun serialize(encoder: Encoder, value: MediaPayload) {
         require(encoder is JsonEncoder) { "MediaPayload can only be serialized to JSON" }
-        encoder.encodeJsonElement(
-            buildJsonObject { put("entries", json.encodeToJsonElement(entriesSerializer, value.entries)) },
-        )
+        val written = json.encodeToJsonElement(entriesSerializer, value.entries).jsonArray
+        encoder.encodeJsonElement(buildJsonObject { put("entries", JsonArray(written + value.unreadable)) })
     }
 
     override fun deserialize(decoder: Decoder): MediaPayload {
         require(decoder is JsonDecoder) { "MediaPayload can only be deserialized from JSON" }
         val items = decoder.decodeJsonElement().jsonObject["entries"]?.jsonArray ?: return MediaPayload()
-        val readable = items.mapNotNull(::readEntry)
-        return MediaPayload(entries = readable, unreadableEntries = items.size - readable.size)
+        val readable = ArrayList<MediaEntry>(items.size)
+        val unreadable = ArrayList<JsonElement>()
+        for (item in items) {
+            val entry = readEntry(item)
+            if (entry != null) readable.add(entry) else unreadable.add(item)
+        }
+        return MediaPayload(entries = readable, unreadable = unreadable)
     }
 
     private fun readEntry(item: JsonElement): MediaEntry? =

@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import pl.stapik.media.R
+import pl.stapik.media.data.model.EntryRating
 import pl.stapik.media.data.model.MediaEntry
 import pl.stapik.media.data.model.details.MediaDetails
 import pl.stapik.media.ui.theme.RetroColorScheme
@@ -56,6 +57,14 @@ fun EntryDetailScreen(
         ) {
             DetailRow(stringResource(R.string.detail_release_date), formatReleaseDate(entry.releaseDate), scheme)
             DetailRow(stringResource(entry.category.consumedDateLabelResource()), formatConsumedDate(entry.consumed), scheme)
+            entry.rating?.let { rating ->
+                DetailRow(
+                    stringResource(R.string.detail_rating),
+                    stringResource(R.string.detail_rating_value, rating, EntryRating.MAX),
+                    scheme,
+                )
+            }
+            DetailRow(stringResource(R.string.detail_note), entry.note, scheme)
 
             when (val details = entry.details) {
                 is MediaDetails.Screen -> {
