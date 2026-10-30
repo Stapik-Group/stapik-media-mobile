@@ -19,6 +19,13 @@ fun MediaCategory.consumedDateLabelResource(): Int = when (this) {
     MediaCategory.GAME -> R.string.media_sort_consumed_completed
 }
 
+fun MediaCategory.consumedFormLabelResource(): Int = when (this) {
+    MediaCategory.MOVIE, MediaCategory.SERIES, MediaCategory.CARTOON -> R.string.entry_consumed_watched
+    MediaCategory.BOOK -> R.string.entry_consumed_read
+    MediaCategory.ALBUM -> R.string.entry_consumed_listened
+    MediaCategory.GAME -> R.string.entry_consumed_completed
+}
+
 @Composable
 fun MediaCategory.displayName(): String = stringResource(
     when (this) {

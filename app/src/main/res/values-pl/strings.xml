@@ -12,6 +12,25 @@
     <string name="media_consumed_listened">Przesłuchano %1$s</string>
     <string name="media_consumed_completed">Ukończono %1$s</string>
     <string name="media_local_empty">Brak wpisów. Połącz się z chmurą, aby wczytać swoją listę.</string>
+    <string name="entry_add">Dodaj wpis</string>
+    <string name="entry_edit">Edytuj wpis</string>
+    <string name="entry_save">Zapisz</string>
+    <string name="entry_cancel">Anuluj</string>
+    <string name="entry_title_label">Tytuł</string>
+    <string name="entry_precision_day">Dzień</string>
+    <string name="entry_precision_month">Miesiąc</string>
+    <string name="entry_precision_year">Rok</string>
+    <string name="entry_consumed_watched">Kiedy obejrzano</string>
+    <string name="entry_consumed_read">Kiedy przeczytano</string>
+    <string name="entry_consumed_listened">Kiedy przesłuchano</string>
+    <string name="entry_consumed_completed">Kiedy ukończono</string>
+    <string name="entry_rating_none">Brak oceny</string>
+    <string name="entry_error_empty_title">Tytuł nie może być pusty.</string>
+    <string name="entry_error_release_year">Podaj rok od 1 do 2100.</string>
+    <string name="entry_error_consumed_year">Podaj rok od 1900 do 2100.</string>
+    <string name="entry_error_duplicate">Na liście jest już „%1$s” (%2$s) w tej kategorii. Ten sam tytuł może wystąpić ponownie tylko z innym rokiem wydania.</string>
+    <string name="entry_error_archive_not_loaded">Wpisy z tego roku są w archiwum w chmurze, które nie zostało jeszcze pobrane. Wybierz najpierw ten rok w filtrze, aby je wczytać, a potem spróbuj ponownie.</string>
+    <string name="entry_error_missing">Wpis został w międzyczasie usunięty, na przykład przez synchronizację. Zmiany nie zostały zapisane.</string>
     <string name="media_action_connect">Połącz</string>
 
     <string name="category_movie">Filmy</string>

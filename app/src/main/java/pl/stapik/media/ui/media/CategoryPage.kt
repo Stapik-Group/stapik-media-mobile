@@ -24,7 +24,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -51,6 +50,7 @@ import pl.stapik.media.data.model.MediaCategory
 import pl.stapik.media.data.model.MediaEntry
 import pl.stapik.media.ui.theme.RetroButton
 import pl.stapik.media.ui.theme.RetroColorScheme
+import pl.stapik.media.ui.theme.retroTextFieldColors
 import pl.stapik.media.util.AppInfo
 import java.time.Month
 import java.time.format.TextStyle
@@ -264,15 +264,7 @@ private fun SearchField(query: String, onQueryChange: (String) -> Unit, scheme: 
         singleLine = true,
         placeholder = { Text(stringResource(R.string.media_search_placeholder)) },
         trailingIcon = clearButton,
-        colors = OutlinedTextFieldDefaults.colors(
-            focusedTextColor = scheme.textDark,
-            unfocusedTextColor = scheme.textDark,
-            focusedBorderColor = scheme.accent,
-            unfocusedBorderColor = scheme.borderDark,
-            cursorColor = scheme.accent,
-            focusedPlaceholderColor = scheme.textMuted,
-            unfocusedPlaceholderColor = scheme.textMuted,
-        ),
+        colors = retroTextFieldColors(scheme),
         modifier = Modifier.fillMaxWidth(),
     )
 }

@@ -12,6 +12,25 @@
     <string name="media_consumed_listened">Listened %1$s</string>
     <string name="media_consumed_completed">Completed %1$s</string>
     <string name="media_local_empty">No entries yet. Connect to the cloud to load your list.</string>
+    <string name="entry_add">Add entry</string>
+    <string name="entry_edit">Edit entry</string>
+    <string name="entry_save">Save</string>
+    <string name="entry_cancel">Cancel</string>
+    <string name="entry_title_label">Title</string>
+    <string name="entry_precision_day">Day</string>
+    <string name="entry_precision_month">Month</string>
+    <string name="entry_precision_year">Year</string>
+    <string name="entry_consumed_watched">When watched</string>
+    <string name="entry_consumed_read">When read</string>
+    <string name="entry_consumed_listened">When listened to</string>
+    <string name="entry_consumed_completed">When completed</string>
+    <string name="entry_rating_none">No rating</string>
+    <string name="entry_error_empty_title">Title cannot be empty.</string>
+    <string name="entry_error_release_year">Enter a year from 1 to 2100.</string>
+    <string name="entry_error_consumed_year">Enter a year from 1900 to 2100.</string>
+    <string name="entry_error_duplicate">The list already has “%1$s” (%2$s) in this category. The same title can appear again only with a different release year.</string>
+    <string name="entry_error_archive_not_loaded">Entries from that year are stored in a cloud archive that has not been downloaded yet. Select the year in the filter first to load it, then try again.</string>
+    <string name="entry_error_missing">The entry was removed in the meantime, for example by a synchronization. Your changes were not saved.</string>
     <string name="media_action_connect">Connect</string>
 
     <string name="category_movie">Movies</string>

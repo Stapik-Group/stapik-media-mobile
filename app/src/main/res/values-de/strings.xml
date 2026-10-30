@@ -12,6 +12,25 @@
     <string name="media_consumed_listened">Gehört %1$s</string>
     <string name="media_consumed_completed">Durchgespielt %1$s</string>
     <string name="media_local_empty">Noch keine Einträge. Verbinde dich mit der Cloud, um deine Liste zu laden.</string>
+    <string name="entry_add">Eintrag hinzufügen</string>
+    <string name="entry_edit">Eintrag bearbeiten</string>
+    <string name="entry_save">Speichern</string>
+    <string name="entry_cancel">Abbrechen</string>
+    <string name="entry_title_label">Titel</string>
+    <string name="entry_precision_day">Tag</string>
+    <string name="entry_precision_month">Monat</string>
+    <string name="entry_precision_year">Jahr</string>
+    <string name="entry_consumed_watched">Wann gesehen</string>
+    <string name="entry_consumed_read">Wann gelesen</string>
+    <string name="entry_consumed_listened">Wann gehört</string>
+    <string name="entry_consumed_completed">Wann durchgespielt</string>
+    <string name="entry_rating_none">Keine Bewertung</string>
+    <string name="entry_error_empty_title">Der Titel darf nicht leer sein.</string>
+    <string name="entry_error_release_year">Gib ein Jahr von 1 bis 2100 ein.</string>
+    <string name="entry_error_consumed_year">Gib ein Jahr von 1900 bis 2100 ein.</string>
+    <string name="entry_error_duplicate">In dieser Kategorie gibt es bereits „%1$s“ (%2$s). Derselbe Titel kann nur mit einem anderen Erscheinungsjahr erneut vorkommen.</string>
+    <string name="entry_error_archive_not_loaded">Die Einträge dieses Jahres liegen in einem Cloud-Archiv, das noch nicht heruntergeladen wurde. Wähle das Jahr zuerst im Filter aus, um es zu laden, und versuche es dann erneut.</string>
+    <string name="entry_error_missing">Der Eintrag wurde inzwischen entfernt, zum Beispiel durch eine Synchronisierung. Deine Änderungen wurden nicht gespeichert.</string>
     <string name="media_action_connect">Verbinden</string>
 
     <string name="category_movie">Filme</string>
