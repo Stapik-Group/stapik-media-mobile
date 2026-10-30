@@ -30,6 +30,7 @@ class MediaViewModel(
     private val archives: MediaArchives,
     private val configStorage: ApiConfigStorage,
     private val resumeThrottle: RefreshThrottle,
+    private val sortStorage: SortPreferenceStorage,
 ) : ViewModel() {
 
     private val baseState = MutableStateFlow<MediaUiState>(MediaUiState.Loading)
@@ -63,6 +64,7 @@ class MediaViewModel(
     private var updateJob: Job? = null
 
     init {
+        viewModelScope.launch { _sort.value = sortStorage.load() }
         viewModelScope.launch { archives.restoreLocal() }
         refresh()
     }
@@ -160,6 +162,7 @@ class MediaViewModel(
 
     fun setSort(sort: EntrySort) {
         _sort.value = sort
+        viewModelScope.launch { sortStorage.save(sort) }
     }
 
     fun setMonthFilter(category: MediaCategory, month: Int?) {

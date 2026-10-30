@@ -3,9 +3,26 @@ package pl.stapik.media.ui.media
 import pl.stapik.media.data.model.MediaEntry
 import pl.stapik.media.util.foldForSearch
 
-enum class SortField { TITLE, RELEASE_DATE, CONSUMED }
+enum class SortField(val key: String) {
+    TITLE("title"),
+    RELEASE_DATE("releaseDate"),
+    CONSUMED("consumed"),
+    ;
 
-enum class SortDirection { ASCENDING, DESCENDING }
+    companion object {
+        fun fromKey(key: String?): SortField? = entries.firstOrNull { it.key == key }
+    }
+}
+
+enum class SortDirection(val key: String) {
+    ASCENDING("ascending"),
+    DESCENDING("descending"),
+    ;
+
+    companion object {
+        fun fromKey(key: String?): SortDirection? = entries.firstOrNull { it.key == key }
+    }
+}
 
 data class EntrySort(
     val field: SortField = SortField.CONSUMED,

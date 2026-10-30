@@ -23,8 +23,10 @@ import pl.stapik.media.data.config.ApiConfigStorage
 import pl.stapik.media.data.config.ConnectionApiConfigStorage
 import pl.stapik.media.data.document.TrackingDocumentStore
 import pl.stapik.media.data.serialization.MediaDocumentCodec
+import pl.stapik.media.ui.media.DataStoreSortPreferenceStorage
 import pl.stapik.media.ui.media.MediaViewModel
 import pl.stapik.media.ui.media.RefreshThrottle
+import pl.stapik.media.ui.media.SortPreferenceStorage
 import pl.stapik.media.ui.theme.DataStoreThemePreferenceStorage
 import pl.stapik.media.ui.theme.ThemePreferenceStorage
 import pl.stapik.media.util.stapikDataDirectory
@@ -46,6 +48,7 @@ class AppContainer(context: Context) {
 
     val configStorage: ApiConfigStorage = connectionStorage
     val themeStorage: ThemePreferenceStorage = DataStoreThemePreferenceStorage(appContext)
+    private val sortStorage: SortPreferenceStorage = DataStoreSortPreferenceStorage(appContext)
 
     init {
         File(appContext.filesDir, OBSOLETE_CACHE_PATH).delete()
@@ -68,6 +71,7 @@ class AppContainer(context: Context) {
                 archives,
                 configStorage,
                 RefreshThrottle(FOREGROUND_REFRESH_INTERVAL_MILLIS, SystemClock::elapsedRealtime),
+                sortStorage,
             ) as T
         }
     }
