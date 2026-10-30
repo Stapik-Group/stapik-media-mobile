@@ -26,6 +26,7 @@ import pl.stapik.media.data.model.MediaCategory
 import pl.stapik.media.data.model.MediaEntry
 import pl.stapik.media.data.serialization.MediaPayload
 import pl.stapik.media.ui.backup.BackupController
+import pl.stapik.media.ui.csv.CsvController
 
 class MediaViewModel(
     private val controller: DocumentController<MediaPayload>,
@@ -36,6 +37,7 @@ class MediaViewModel(
     private val resumeThrottle: RefreshThrottle,
     private val sortStorage: SortPreferenceStorage,
     val backup: BackupController,
+    val csv: CsvController,
 ) : ViewModel() {
 
     private val baseState = MutableStateFlow<MediaUiState>(MediaUiState.Loading)

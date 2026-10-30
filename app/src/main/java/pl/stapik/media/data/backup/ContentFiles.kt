@@ -7,11 +7,14 @@ import java.io.IOException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
+class FileTooLargeException : IOException("The file is too large")
+
 object ContentFiles {
-    const val MAX_BYTES = 64 * 1024 * 1024
+    const val MAX_BACKUP_BYTES = 64 * 1024 * 1024
+    const val MAX_CSV_BYTES = 16 * 1024 * 1024
     private const val BUFFER_BYTES = 8 * 1024
 
-    suspend fun read(resolver: ContentResolver, uri: Uri): ByteArray = withContext(Dispatchers.IO) {
+    suspend fun read(resolver: ContentResolver, uri: Uri, maxBytes: Int): ByteArray = withContext(Dispatchers.IO) {
         val stream = resolver.openInputStream(uri) ?: throw IOException("Cannot open the file")
         stream.use { input ->
             val collected = ByteArrayOutputStream()
@@ -19,7 +22,7 @@ object ContentFiles {
             while (true) {
                 val count = input.read(buffer)
                 if (count < 0) break
-                if (collected.size() + count > MAX_BYTES) throw BackupException(BackupFailure.NOT_A_BACKUP)
+                if (collected.size() + count > maxBytes) throw FileTooLargeException()
                 collected.write(buffer, 0, count)
             }
             collected.toByteArray()

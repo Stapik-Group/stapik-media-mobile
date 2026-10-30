@@ -35,7 +35,7 @@ fun BackupSection(controller: BackupController) {
         uri?.let { controller.export { bytes -> ContentFiles.write(resolver, it, bytes) } }
     }
     val importLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-        uri?.let { controller.open { ContentFiles.read(resolver, it) } }
+        uri?.let { controller.open { ContentFiles.read(resolver, it, ContentFiles.MAX_BACKUP_BYTES) } }
     }
     val idle = state is BackupState.Idle
     val working = state is BackupState.Working

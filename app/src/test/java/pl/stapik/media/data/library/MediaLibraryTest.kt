@@ -267,4 +267,39 @@ class MediaLibraryTest {
 
         assertEquals(listOf(raw), main.payload.unreadable)
     }
+
+    @Test
+    fun previewingAnImportJudgesEveryCandidate() = runBlocking {
+        main.payload = MediaPayload(listOf(entry("Dune", id = "a")))
+        archives.remote = setOf(2023)
+
+        val verdicts = library.previewImport(
+            listOf(
+                entry("dune "),
+                entry("Arrival"),
+                entry("Arrival"),
+                entry("Old", consumedYear = 2023),
+                entry("Dune", released = 2021),
+            ),
+        )
+
+        assertEquals(
+            listOf(ImportVerdict.DUPLICATE, ImportVerdict.ADD, ImportVerdict.DUPLICATE, ImportVerdict.ARCHIVE_NOT_LOADED, ImportVerdict.ADD),
+            verdicts,
+        )
+    }
+
+    @Test
+    fun importingAddsOnlyTheNewEntriesWithFreshIdsToTheRightDocuments() = runBlocking {
+        main.payload = MediaPayload(listOf(entry("Dune", id = "a")))
+        archives.editors[2024] = FakeEditor()
+
+        val added = library.importEntries(listOf(entry("Dune"), entry("Arrival"), entry("Solaris", consumedYear = 2024, id = "a")))
+
+        assertEquals(listOf("Arrival", "Solaris"), added.map { it.title })
+        assertEquals(listOf("Dune", "Arrival"), main.payload.entries.map { it.title })
+        assertEquals(listOf("Solaris"), archives.editors.getValue(2024).payload.entries.map { it.title })
+        val ids = main.payload.entries.map { it.id } + archives.editors.getValue(2024).payload.entries.map { it.id }
+        assertEquals(3, ids.toSet().size)
+    }
 }

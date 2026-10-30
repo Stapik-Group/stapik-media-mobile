@@ -3,6 +3,7 @@ package pl.stapik.media.ui.entry
 import java.time.LocalDate
 import java.time.YearMonth
 import kotlinx.serialization.json.JsonObject
+import pl.stapik.media.data.library.EntryRules
 import pl.stapik.media.data.model.ConsumedDate
 import pl.stapik.media.data.model.DatePrecision
 import pl.stapik.media.data.model.MediaCategory
@@ -81,8 +82,8 @@ data class EntryForm(
     )
 
     companion object {
-        val RELEASE_YEARS = 1..2100
-        val CONSUMED_YEARS = 1900..2100
+        val RELEASE_YEARS = EntryRules.RELEASE_YEARS
+        val CONSUMED_YEARS = EntryRules.CONSUMED_YEARS
         private const val NO_RATING = 0
 
         fun blank(category: MediaCategory, today: LocalDate): EntryForm = EntryForm(

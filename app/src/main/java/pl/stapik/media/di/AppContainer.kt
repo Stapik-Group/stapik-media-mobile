@@ -35,6 +35,7 @@ import pl.stapik.media.data.library.newEntryId
 import pl.stapik.media.data.sync.BackgroundOutcome
 import pl.stapik.media.data.serialization.MediaDocumentCodec
 import pl.stapik.media.ui.backup.BackupController
+import pl.stapik.media.ui.csv.CsvController
 import pl.stapik.media.ui.media.DataStoreSortPreferenceStorage
 import pl.stapik.media.ui.media.MediaViewModel
 import pl.stapik.media.ui.media.RefreshThrottle
@@ -95,10 +96,17 @@ class AppContainer(context: Context) {
                 newId = ::newEntryId,
                 isConnected = { configStorage.load() != null },
             )
+            val backupService = BackupService(library, safetyCopies, Clock.systemUTC(), AppInfo.VERSION_NAME)
             val backup = BackupController(
-                service = BackupService(library, safetyCopies, Clock.systemUTC(), AppInfo.VERSION_NAME),
+                service = backupService,
                 scope = appScope,
                 afterRestore = { controller.flushPendingSync() },
+            )
+            val csv = CsvController(
+                library = library,
+                scope = appScope,
+                beforeImport = { backupService.keepCurrentState() },
+                afterImport = { controller.flushPendingSync() },
             )
             return MediaViewModel(
                 controller,
@@ -109,6 +117,7 @@ class AppContainer(context: Context) {
                 RefreshThrottle(FOREGROUND_REFRESH_INTERVAL_MILLIS, SystemClock::elapsedRealtime),
                 sortStorage,
                 backup,
+                csv,
             ) as T
         }
     }

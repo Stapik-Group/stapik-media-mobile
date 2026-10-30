@@ -46,13 +46,18 @@ class BackupService(
         return Opened(BackupDocument.read(document), contents.createdAt)
     }
 
-    suspend fun restore(backup: Opened): ReplaceReport {
-        val previous = library.snapshot().payload
+    suspend fun keepCurrentState(): MediaPayload {
+        val current = library.snapshot().payload
         try {
-            safetyCopies.save(archiveOf(previous))
+            safetyCopies.save(archiveOf(current))
         } catch (e: IOException) {
             throw BackupException(BackupFailure.UNREADABLE, e)
         }
+        return current
+    }
+
+    suspend fun restore(backup: Opened): ReplaceReport {
+        val previous = keepCurrentState()
         return try {
             library.replaceAll(backup.payload)
         } catch (e: Throwable) {

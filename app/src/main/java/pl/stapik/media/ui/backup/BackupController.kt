@@ -10,6 +10,7 @@ import pl.stapik.common.document.SafetyCopy
 import pl.stapik.media.data.backup.BackupException
 import pl.stapik.media.data.backup.BackupFailure
 import pl.stapik.media.data.backup.BackupService
+import pl.stapik.media.data.backup.FileTooLargeException
 
 class BackupController(
     private val service: BackupService,
@@ -64,6 +65,8 @@ class BackupController(
             body()
         } catch (e: CancellationException) {
             throw e
+        } catch (e: FileTooLargeException) {
+            BackupState.Finished(BackupOutcome.Failed(operation, BackupFailure.NOT_A_BACKUP, e.message.orEmpty()))
         } catch (e: BackupException) {
             BackupState.Finished(BackupOutcome.Failed(operation, e.failure, e.message.orEmpty()))
         } catch (e: Exception) {

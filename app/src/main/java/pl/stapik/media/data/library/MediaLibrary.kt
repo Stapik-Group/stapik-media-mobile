@@ -66,6 +66,29 @@ class MediaLibrary(
         )
     }
 
+    suspend fun previewImport(candidates: List<MediaEntry>): List<ImportVerdict> {
+        val known = allEntries().mapTo(HashSet(), EntryRules::workKey)
+        return candidates.map { candidate ->
+            when {
+                !canWriteYear(candidate.consumed.year) -> ImportVerdict.ARCHIVE_NOT_LOADED
+                known.add(EntryRules.workKey(candidate)) -> ImportVerdict.ADD
+                else -> ImportVerdict.DUPLICATE
+            }
+        }
+    }
+
+    suspend fun importEntries(candidates: List<MediaEntry>): List<MediaEntry> {
+        val verdicts = previewImport(candidates)
+        val taken = allEntries().mapTo(HashSet()) { it.id }
+        val accepted = candidates.zip(verdicts)
+            .filter { (_, verdict) -> verdict == ImportVerdict.ADD }
+            .map { (candidate, _) -> candidate.copy(id = freshId(taken).also { taken.add(it) }) }
+        for ((year, entries) in accepted.groupBy { archiveYearOf(it) }) {
+            editorFor(year).edit { payload -> payload.copy(entries = payload.entries + entries) }
+        }
+        return accepted
+    }
+
     private fun withUniqueIds(entries: List<MediaEntry>): List<MediaEntry> {
         val seen = HashSet<String>()
         return entries.map { entry ->

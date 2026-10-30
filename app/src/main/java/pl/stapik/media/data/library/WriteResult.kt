@@ -22,3 +22,5 @@ data class LibrarySnapshot(val payload: MediaPayload, val unavailableYears: Set<
 data class ReplaceReport(val applied: Int, val skippedByYear: Map<Int, Int>) {
     val skipped: Int get() = skippedByYear.values.sum()
 }
+
+enum class ImportVerdict { ADD, DUPLICATE, ARCHIVE_NOT_LOADED }
