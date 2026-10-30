@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
@@ -35,6 +37,7 @@ import pl.stapik.common.presentation.SyncAction
 import pl.stapik.common.ui.sync.LoadErrorMessage
 import pl.stapik.common.ui.sync.SyncStatusBanner
 import pl.stapik.media.R
+import pl.stapik.media.data.archive.ArchiveStatus
 import pl.stapik.media.data.model.MediaCategory
 import pl.stapik.media.data.model.MediaEntry
 import pl.stapik.media.ui.theme.RetroButton
@@ -89,6 +92,7 @@ fun CategoryPage(
         is MediaUiState.Success -> {
             val entries = state.entries.filteredFor(category, filter)
             val years = state.entries.availableYearsFor(category, state.archiveYears)
+            val archiveStatus = filter.year?.let { state.archiveStatus[it] }
 
             PullToRefreshBox(
                 isRefreshing = isRefreshing,
@@ -129,7 +133,18 @@ fun CategoryPage(
                         )
                     }
 
-                    if (entries.isEmpty()) {
+                    if (archiveStatus != null && filter.year != null) {
+                        item {
+                            ArchiveStatusRow(
+                                year = filter.year,
+                                status = archiveStatus,
+                                onRetry = { viewModel.requestArchive(filter.year) },
+                                scheme = scheme,
+                            )
+                        }
+                    }
+
+                    if (entries.isEmpty() && archiveStatus == null) {
                         item { Text(text = stringResource(R.string.media_no_entries), color = scheme.textMuted) }
                     }
 
@@ -152,6 +167,23 @@ private fun StaleDataBanner(updatedAt: String, scheme: RetroColorScheme) {
             .background(scheme.borderLight)
             .padding(8.dp),
     )
+}
+
+@Composable
+private fun ArchiveStatusRow(year: Int, status: ArchiveStatus, onRetry: () -> Unit, scheme: RetroColorScheme) {
+    when (status) {
+        ArchiveStatus.Loading -> Row(verticalAlignment = Alignment.CenterVertically) {
+            CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp, color = scheme.accent)
+            Spacer(modifier = Modifier.width(12.dp))
+            Text(text = stringResource(R.string.media_archive_loading, year), color = scheme.textDark)
+        }
+
+        ArchiveStatus.Failed -> Column {
+            Text(text = stringResource(R.string.media_archive_failed, year), color = scheme.textDark)
+            Spacer(modifier = Modifier.height(8.dp))
+            RetroButton(text = stringResource(R.string.retry), onClick = onRetry, scheme = scheme)
+        }
+    }
 }
 
 @Composable

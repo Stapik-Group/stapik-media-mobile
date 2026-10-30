@@ -34,6 +34,8 @@
     <string name="detail_platform">Plattform</string>
 
     <string name="media_stale_banner">Zwischengespeicherte Daten vom %1$s</string>
+    <string name="media_archive_loading">Archiv %1$d wird heruntergeladen…</string>
+    <string name="media_archive_failed">Das Archiv %1$d konnte nicht heruntergeladen werden.</string>
 
 
 

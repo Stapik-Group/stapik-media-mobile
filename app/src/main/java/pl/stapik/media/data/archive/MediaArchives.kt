@@ -36,9 +36,11 @@ class MediaArchives(
     private val storedFileName = Regex("${Regex.escape(slot.value)}@(\\d{4})\\.doc")
     private val mutableEntries = MutableStateFlow<Map<Int, List<MediaEntry>>>(emptyMap())
     private val mutableYears = MutableStateFlow<Set<Int>>(emptySet())
+    private val mutableStatus = MutableStateFlow<Map<Int, ArchiveStatus>>(emptyMap())
 
     val entries: StateFlow<Map<Int, List<MediaEntry>>> = mutableEntries.asStateFlow()
     val years: StateFlow<Set<Int>> = mutableYears.asStateFlow()
+    val status: StateFlow<Map<Int, ArchiveStatus>> = mutableStatus.asStateFlow()
 
     suspend fun restoreLocal() {
         storedYears().forEach { year -> guarded(year) { publish(year) } }
@@ -64,7 +66,14 @@ class MediaArchives(
 
     suspend fun request(year: Int) {
         if (year in mutableEntries.value || year !in mutableYears.value) return
-        sync(year)
+        mutableStatus.update { it + (year to ArchiveStatus.Loading) }
+        try {
+            sync(year)
+        } catch (e: CancellationException) {
+            mutableStatus.update { it - year }
+            throw e
+        }
+        mutableStatus.update { if (year in mutableEntries.value) it - year else it + (year to ArchiveStatus.Failed) }
     }
 
     private suspend fun sync(year: Int) = guarded(year) { archive ->

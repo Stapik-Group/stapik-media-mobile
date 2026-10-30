@@ -1,6 +1,7 @@
 package pl.stapik.media.ui.media
 
 import pl.stapik.common.presentation.LoadErrorKind
+import pl.stapik.media.data.archive.ArchiveStatus
 import pl.stapik.media.data.model.MediaEntry
 
 sealed interface MediaUiState {
@@ -12,6 +13,7 @@ sealed interface MediaUiState {
         val isStale: Boolean,
         val updatedAt: String,
         val archiveYears: Set<Int> = emptySet(),
+        val archiveStatus: Map<Int, ArchiveStatus> = emptyMap(),
     ) : MediaUiState
 
     data class Error(val error: MediaLoadError) : MediaUiState

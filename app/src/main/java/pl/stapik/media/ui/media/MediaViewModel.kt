@@ -29,9 +29,9 @@ class MediaViewModel(
 
     private val baseState = MutableStateFlow<MediaUiState>(MediaUiState.Loading)
 
-    val uiState: StateFlow<MediaUiState> = combine(baseState, archives.entries, archives.years) { state, archived, years ->
+    val uiState: StateFlow<MediaUiState> = combine(baseState, archives.entries, archives.years, archives.status) { state, archived, years, status ->
         if (state is MediaUiState.Success) {
-            state.copy(entries = state.entries + archived.values.flatten(), archiveYears = years)
+            state.copy(entries = state.entries + archived.values.flatten(), archiveYears = years, archiveStatus = status)
         } else {
             state
         }
@@ -112,7 +112,7 @@ class MediaViewModel(
         year?.let(::requestArchive)
     }
 
-    private fun requestArchive(year: Int) {
+    fun requestArchive(year: Int) {
         viewModelScope.launch { archives.request(year) }
     }
 
