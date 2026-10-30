@@ -40,6 +40,16 @@
     <string name="media_sync_offline_network">No connection to the cloud. Showing the copy stored on this device</string>
     <string name="media_sync_offline_server">The cloud is not responding. Showing the copy stored on this device</string>
     <string name="media_sync_cloud_document_missing">The cloud has no data for this app. Showing the copy stored on this device</string>
+    <string name="media_search_placeholder">Search by title</string>
+    <string name="media_search_clear">Clear search</string>
+    <string name="media_sort_title">Title</string>
+    <string name="media_sort_release_date">Release date</string>
+    <string name="media_sort_consumed_watched">Date watched</string>
+    <string name="media_sort_consumed_read">Date read</string>
+    <string name="media_sort_consumed_listened">Date listened</string>
+    <string name="media_sort_consumed_completed">Date completed</string>
+    <string name="media_sort_ascending">Ascending</string>
+    <string name="media_sort_descending">Descending</string>
 
 
 

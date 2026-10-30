@@ -40,6 +40,16 @@
     <string name="media_sync_offline_network">Keine Verbindung zur Cloud. Es wird die auf dem Gerät gespeicherte Kopie angezeigt</string>
     <string name="media_sync_offline_server">Die Cloud antwortet nicht. Es wird die auf dem Gerät gespeicherte Kopie angezeigt</string>
     <string name="media_sync_cloud_document_missing">In der Cloud gibt es keine Daten für diese App. Es wird die auf dem Gerät gespeicherte Kopie angezeigt</string>
+    <string name="media_search_placeholder">Nach Titel suchen</string>
+    <string name="media_search_clear">Suche löschen</string>
+    <string name="media_sort_title">Titel</string>
+    <string name="media_sort_release_date">Erscheinungsdatum</string>
+    <string name="media_sort_consumed_watched">Datum gesehen</string>
+    <string name="media_sort_consumed_read">Datum gelesen</string>
+    <string name="media_sort_consumed_listened">Datum gehört</string>
+    <string name="media_sort_consumed_completed">Datum durchgespielt</string>
+    <string name="media_sort_ascending">Aufsteigend</string>
+    <string name="media_sort_descending">Absteigend</string>
 
 
 

@@ -54,6 +54,9 @@ class MediaViewModel(
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
 
+    private val _sort = MutableStateFlow(EntrySort())
+    val sort: StateFlow<EntrySort> = _sort.asStateFlow()
+
     private val _filters = MutableStateFlow(mapOf<MediaCategory, CategoryFilter>())
     val filters: StateFlow<Map<MediaCategory, CategoryFilter>> = _filters.asStateFlow()
 
@@ -150,13 +153,22 @@ class MediaViewModel(
         viewModelScope.launch { archives.request(year) }
     }
 
+    fun setQueryFilter(category: MediaCategory, query: String) {
+        val current = _filters.value[category] ?: CategoryFilter.None
+        _filters.value += (category to current.copy(query = query))
+    }
+
+    fun setSort(sort: EntrySort) {
+        _sort.value = sort
+    }
+
     fun setMonthFilter(category: MediaCategory, month: Int?) {
         val current = _filters.value[category] ?: CategoryFilter.None
         _filters.value += (category to current.copy(month = month))
     }
 }
 
-data class CategoryFilter(val year: Int? = null, val month: Int? = null) {
+data class CategoryFilter(val year: Int? = null, val month: Int? = null, val query: String = "") {
     companion object {
         val None = CategoryFilter()
     }

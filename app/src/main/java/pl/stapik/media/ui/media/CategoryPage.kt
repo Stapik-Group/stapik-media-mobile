@@ -15,10 +15,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -27,10 +33,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import pl.stapik.common.presentation.SyncAction
@@ -60,6 +69,7 @@ fun CategoryPage(
     val uiState by viewModel.uiState.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
     val filters by viewModel.filters.collectAsState()
+    val sort by viewModel.sort.collectAsState()
     val syncState by viewModel.syncState.collectAsState()
     val filter = filters[category] ?: CategoryFilter.None
     val uriHandler = LocalUriHandler.current
@@ -90,7 +100,9 @@ fun CategoryPage(
         }
 
         is MediaUiState.Success -> {
-            val entries = state.entries.filteredFor(category, filter).withListKeys()
+            val entries = remember(state.entries, category, filter, sort) {
+                state.entries.filteredFor(category, filter, sort).withListKeys()
+            }
             val years = state.entries.availableYearsFor(category, state.archiveYears)
             val archiveStatus = filter.year?.let { state.archiveStatus[it] }
 
@@ -137,11 +149,16 @@ fun CategoryPage(
 
                     item {
                         FilterBar(
+                            category = category,
                             years = years,
                             selectedYear = filter.year,
                             selectedMonth = filter.month,
+                            query = filter.query,
+                            sort = sort,
                             onYearSelected = { viewModel.setYearFilter(category, it) },
                             onMonthSelected = { viewModel.setMonthFilter(category, it) },
+                            onQueryChange = { viewModel.setQueryFilter(category, it) },
+                            onSortChange = viewModel::setSort,
                             scheme = scheme,
                         )
                     }
@@ -209,20 +226,107 @@ private fun ArchiveStatusRow(year: Int, status: ArchiveStatus, onRetry: () -> Un
 
 @Composable
 private fun FilterBar(
+    category: MediaCategory,
     years: List<Int>,
     selectedYear: Int?,
     selectedMonth: Int?,
+    query: String,
+    sort: EntrySort,
     onYearSelected: (Int?) -> Unit,
     onMonthSelected: (Int?) -> Unit,
+    onQueryChange: (String) -> Unit,
+    onSortChange: (EntrySort) -> Unit,
     scheme: RetroColorScheme,
 ) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        YearDropdown(years, selectedYear, onYearSelected, scheme)
-        if (selectedYear != null) {
-            MonthDropdown(selectedMonth, onMonthSelected, scheme)
+    Column {
+        SearchField(query, onQueryChange, scheme)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            YearDropdown(years, selectedYear, onYearSelected, scheme)
+            if (selectedYear != null) {
+                MonthDropdown(selectedMonth, onMonthSelected, scheme)
+            }
+            Spacer(modifier = Modifier.weight(1f))
+            SortControls(category, sort, onSortChange, scheme)
         }
     }
 }
+
+@Composable
+private fun SearchField(query: String, onQueryChange: (String) -> Unit, scheme: RetroColorScheme) {
+    var text by rememberSaveable { mutableStateOf(query) }
+    val clearButton: @Composable (() -> Unit)? = if (text.isEmpty()) {
+        null
+    } else {
+        {
+            IconButton(onClick = { text = ""; onQueryChange("") }) {
+                Icon(
+                    Icons.Filled.Close,
+                    contentDescription = stringResource(R.string.media_search_clear),
+                    tint = scheme.textMuted,
+                )
+            }
+        }
+    }
+    OutlinedTextField(
+        value = text,
+        onValueChange = { text = it; onQueryChange(it) },
+        singleLine = true,
+        placeholder = { Text(stringResource(R.string.media_search_placeholder)) },
+        trailingIcon = clearButton,
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedTextColor = scheme.textDark,
+            unfocusedTextColor = scheme.textDark,
+            focusedBorderColor = scheme.accent,
+            unfocusedBorderColor = scheme.borderDark,
+            cursorColor = scheme.accent,
+            focusedPlaceholderColor = scheme.textMuted,
+            unfocusedPlaceholderColor = scheme.textMuted,
+        ),
+        modifier = Modifier.fillMaxWidth(),
+    )
+}
+
+@Composable
+private fun SortControls(category: MediaCategory, sort: EntrySort, onSortChange: (EntrySort) -> Unit, scheme: RetroColorScheme) {
+    var expanded by remember { mutableStateOf(false) }
+    val directionLabel = stringResource(if (sort.isAscending) R.string.media_sort_ascending else R.string.media_sort_descending)
+
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Box {
+            TextButton(onClick = { expanded = true }) {
+                Text(sort.field.label(category), color = scheme.accent)
+            }
+            DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                SortField.entries.forEach { field ->
+                    DropdownMenuItem(
+                        text = { Text(field.label(category)) },
+                        onClick = { onSortChange(sort.copy(field = field)); expanded = false },
+                    )
+                }
+            }
+        }
+        TextButton(
+            onClick = { onSortChange(sort.withReversedDirection()) },
+            modifier = Modifier.semantics { contentDescription = directionLabel },
+        ) {
+            Text(if (sort.isAscending) "\u2191" else "\u2193", color = scheme.accent)
+        }
+    }
+}
+
+@Composable
+private fun SortField.label(category: MediaCategory): String = stringResource(
+    when (this) {
+        SortField.TITLE -> R.string.media_sort_title
+        SortField.RELEASE_DATE -> R.string.media_sort_release_date
+        SortField.CONSUMED -> when (category) {
+            MediaCategory.MOVIE, MediaCategory.SERIES, MediaCategory.CARTOON -> R.string.media_sort_consumed_watched
+            MediaCategory.BOOK -> R.string.media_sort_consumed_read
+            MediaCategory.ALBUM -> R.string.media_sort_consumed_listened
+            MediaCategory.GAME -> R.string.media_sort_consumed_completed
+        }
+    },
+)
 
 @Composable
 private fun YearDropdown(

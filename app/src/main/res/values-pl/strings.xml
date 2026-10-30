@@ -40,6 +40,16 @@
     <string name="media_sync_offline_network">Brak połączenia z chmurą. Pokazuję kopię zapisaną na urządzeniu</string>
     <string name="media_sync_offline_server">Chmura nie odpowiada. Pokazuję kopię zapisaną na urządzeniu</string>
     <string name="media_sync_cloud_document_missing">W chmurze nie ma danych tej aplikacji. Pokazuję kopię zapisaną na urządzeniu</string>
+    <string name="media_search_placeholder">Szukaj po tytule</string>
+    <string name="media_search_clear">Wyczyść wyszukiwanie</string>
+    <string name="media_sort_title">Tytuł</string>
+    <string name="media_sort_release_date">Data wydania</string>
+    <string name="media_sort_consumed_watched">Data obejrzenia</string>
+    <string name="media_sort_consumed_read">Data przeczytania</string>
+    <string name="media_sort_consumed_listened">Data przesłuchania</string>
+    <string name="media_sort_consumed_completed">Data ukończenia</string>
+    <string name="media_sort_ascending">Rosnąco</string>
+    <string name="media_sort_descending">Malejąco</string>
 
 
 

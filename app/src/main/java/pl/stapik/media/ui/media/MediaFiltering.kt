@@ -2,14 +2,18 @@ package pl.stapik.media.ui.media
 
 import pl.stapik.media.data.model.MediaCategory
 import pl.stapik.media.data.model.MediaEntry
+import pl.stapik.media.util.foldForSearch
 
-fun List<MediaEntry>.filteredFor(category: MediaCategory, filter: CategoryFilter): List<MediaEntry> =
-    asSequence()
+fun List<MediaEntry>.filteredFor(category: MediaCategory, filter: CategoryFilter, sort: EntrySort): List<MediaEntry> {
+    val query = foldForSearch(filter.query.trim())
+    return asSequence()
         .filter { it.category == category }
         .filter { filter.year == null || it.consumed.year == filter.year }
         .filter { filter.month == null || it.consumed.month == filter.month }
-        .sortedWith(compareByDescending<MediaEntry> { it.consumed.year }.thenByDescending { it.consumed.month })
+        .filter { query.isEmpty() || foldForSearch(it.title).contains(query) }
+        .sortedWith(sort.comparator())
         .toList()
+}
 
 data class KeyedEntry(val key: String, val entry: MediaEntry)
 
