@@ -79,22 +79,6 @@ fun CategoryPage(
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
         }
 
-        is MediaUiState.NotConnected -> CenteredMessageWithAction(
-            message = stringResource(R.string.media_error_not_connected),
-            actionLabel = stringResource(R.string.media_action_connect),
-            onAction = onNavigateToConnect,
-            scheme = scheme,
-            modifier = modifier,
-        )
-
-        is MediaUiState.Error -> CenteredMessageWithAction(
-            message = state.error.toDisplayMessage(),
-            actionLabel = stringResource(R.string.retry),
-            onAction = { viewModel.refresh() },
-            scheme = scheme,
-            modifier = modifier,
-        )
-
         is MediaUiState.LocalDataError -> Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             LoadErrorMessage(kind = state.kind, onDiscardLocal = viewModel::discardLocalAndResync)
         }
@@ -175,8 +159,14 @@ fun CategoryPage(
                         }
                     }
 
-                    if (entries.isEmpty() && archiveStatus == null) {
-                        item { Text(text = stringResource(R.string.media_no_entries), color = scheme.textMuted) }
+                    if (entries.isEmpty() && archiveStatus == null && !isRefreshing) {
+                        item {
+                            if (state.connected) {
+                                Text(text = stringResource(R.string.media_no_entries), color = scheme.textMuted)
+                            } else {
+                                LocalModeHint(onConnect = onNavigateToConnect, scheme = scheme)
+                            }
+                        }
                     }
 
                     items(entries, key = { it.key }) { keyed ->
@@ -374,19 +364,11 @@ private fun MonthDropdown(
 }
 
 @Composable
-private fun CenteredMessageWithAction(
-    message: String,
-    actionLabel: String,
-    onAction: () -> Unit,
-    scheme: RetroColorScheme,
-    modifier: Modifier = Modifier,
-) {
-    Box(modifier = modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(message, color = scheme.textDark)
-            Spacer(modifier = Modifier.height(12.dp))
-            RetroButton(text = actionLabel, onClick = onAction, scheme = scheme)
-        }
+private fun LocalModeHint(onConnect: () -> Unit, scheme: RetroColorScheme) {
+    Column {
+        Text(text = stringResource(R.string.media_local_empty), color = scheme.textMuted)
+        Spacer(modifier = Modifier.height(12.dp))
+        RetroButton(text = stringResource(R.string.media_action_connect), onClick = onConnect, scheme = scheme)
     }
 }
 

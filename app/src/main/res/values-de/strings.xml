@@ -11,7 +11,7 @@
     <string name="media_consumed_read">Gelesen %1$s</string>
     <string name="media_consumed_listened">Gehört %1$s</string>
     <string name="media_consumed_completed">Durchgespielt %1$s</string>
-    <string name="media_error_not_connected">Nicht verbunden</string>
+    <string name="media_local_empty">Noch keine Einträge. Verbinde dich mit der Cloud, um deine Liste zu laden.</string>
     <string name="media_action_connect">Verbinden</string>
 
     <string name="category_movie">Filme</string>
@@ -60,7 +60,6 @@
 
     <string name="error_no_network">Keine Netzwerkverbindung.</string>
     <string name="error_unauthorized">Ungültige Server-URL oder API-Schlüssel.</string>
-    <string name="error_not_found">Medienprotokoll wurde auf dem Server nicht gefunden. Überprüfe die Verbindungseinstellungen.</string>
     <string name="error_unknown">Etwas ist schiefgelaufen: %1$s</string>
 
     <string name="retry">Erneut versuchen</string>

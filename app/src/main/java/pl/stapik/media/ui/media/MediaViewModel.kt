@@ -65,6 +65,7 @@ class MediaViewModel(
     val pendingChoice: StateFlow<SyncOutcome.NeedsFirstConnectionChoice?> = _pendingChoice.asStateFlow()
 
     private var updateJob: Job? = null
+    private var connected = false
 
     init {
         viewModelScope.launch { _sort.value = sortStorage.load() }
@@ -93,7 +94,7 @@ class MediaViewModel(
 
     private fun showStoredCopy() {
         if (baseState.value is MediaUiState.Success) return
-        val state = mediaUiStateFor(controller.document.value, localSnapshot.value, failure = null)
+        val state = mediaUiStateFor(controller.document.value, localSnapshot.value, failure = null, connected = connected)
         if (state is MediaUiState.Success) {
             baseState.value = state
             _isRefreshing.value = true
@@ -111,11 +112,7 @@ class MediaViewModel(
             }
 
             try {
-                if (configStorage.load() == null) {
-                    baseState.value = MediaUiState.NotConnected
-                    return@launch
-                }
-
+                connected = configStorage.load() != null
                 val state = stateAfter(update())
                 if (state is MediaUiState.Success) archives.refreshYears()
                 baseState.value = state
@@ -148,11 +145,17 @@ class MediaViewModel(
     }
 
     private fun stateAfter(outcome: SyncOutcome?): MediaUiState =
-        mediaUiStateFor(controller.document.value, localSnapshot.value, outcome?.toMediaLoadError())
+        mediaUiStateFor(controller.document.value, localSnapshot.value, outcome?.toMediaLoadError(), connected)
 
     private suspend fun stateAfterFailure(error: Exception): MediaUiState {
         controller.load()
-        return mediaUiStateFor(controller.document.value, localSnapshot.value, error.toMediaLoadError(), announceFailure = true)
+        return mediaUiStateFor(
+            controller.document.value,
+            localSnapshot.value,
+            error.toMediaLoadError(),
+            connected,
+            announceFailure = true,
+        )
     }
 
     fun setYearFilter(category: MediaCategory, year: Int?) {

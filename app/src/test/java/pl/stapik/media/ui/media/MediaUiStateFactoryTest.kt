@@ -2,6 +2,7 @@ package pl.stapik.media.ui.media
 
 import kotlinx.serialization.json.JsonNull
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -17,47 +18,50 @@ class MediaUiStateFactoryTest {
 
     @Test
     fun unreadableLocalDataWinsOverAnyFailure() {
-        val state = mediaUiStateFor(DocumentUiState.Error(LoadErrorKind.CORRUPTED), synchronizedCopy, MediaLoadError.NoNetwork)
+        val state = mediaUiStateFor(DocumentUiState.Error(LoadErrorKind.CORRUPTED), synchronizedCopy, MediaLoadError.NoNetwork, connected = true)
 
         assertEquals(MediaUiState.LocalDataError(LoadErrorKind.CORRUPTED), state)
     }
 
     @Test
-    fun withoutASynchronisedCopyTheFailureIsShown() {
-        val state = mediaUiStateFor(empty, snapshot = null, failure = MediaLoadError.NoNetwork)
+    fun anEmptyLocalListIsShownWithoutAConnection() {
+        val state = mediaUiStateFor(empty, snapshot = null, failure = null, connected = false) as MediaUiState.Success
 
-        assertEquals(MediaUiState.Error(MediaLoadError.NoNetwork), state)
+        assertTrue(state.entries.isEmpty())
+        assertFalse(state.connected)
+        assertFalse(state.isStale)
     }
 
     @Test
-    fun withoutASynchronisedCopyAndWithoutFailureTheCloudDocumentIsMissing() {
-        val state = mediaUiStateFor(empty, LocalSnapshot("", everSynchronized = false), failure = null)
+    fun anEmptyListIsShownEvenWhenTheFirstSynchronisationFails() {
+        val state = mediaUiStateFor(empty, snapshot = null, failure = MediaLoadError.NoNetwork, connected = true) as MediaUiState.Success
 
-        assertEquals(MediaUiState.Error(MediaLoadError.NotFound), state)
+        assertTrue(state.isStale)
+        assertEquals("", state.updatedAt)
     }
 
     @Test
     fun dataThatWasNeverSynchronisedIsStillShown() {
         val neverSynchronised = LocalSnapshot(lastUpdate = "2026-10-30T09:00:00Z", everSynchronized = false)
 
-        val state = mediaUiStateFor(loaded, neverSynchronised, failure = null) as MediaUiState.Success
+        val state = mediaUiStateFor(loaded, neverSynchronised, failure = null, connected = true) as MediaUiState.Success
 
-        assertEquals(false, state.isStale)
+        assertFalse(state.isStale)
         assertEquals("2026-10-30T09:00:00Z", state.updatedAt)
     }
 
     @Test
     fun aSuccessfulRefreshIsNotStale() {
-        val state = mediaUiStateFor(loaded, synchronizedCopy, failure = null) as MediaUiState.Success
+        val state = mediaUiStateFor(loaded, synchronizedCopy, failure = null, connected = true) as MediaUiState.Success
 
-        assertEquals(false, state.isStale)
+        assertFalse(state.isStale)
         assertEquals(2, state.unreadableEntries)
         assertNull(state.refreshError)
     }
 
     @Test
     fun aSynchronisedCopyStaysVisibleWhenTheRefreshFails() {
-        val state = mediaUiStateFor(loaded, synchronizedCopy, MediaLoadError.NoNetwork) as MediaUiState.Success
+        val state = mediaUiStateFor(loaded, synchronizedCopy, MediaLoadError.NoNetwork, connected = true) as MediaUiState.Success
 
         assertTrue(state.isStale)
         assertNull(state.refreshError)
@@ -67,7 +71,7 @@ class MediaUiStateFactoryTest {
     fun anAnnouncedFailureIsKeptNextToTheStoredCopy() {
         val failure = MediaLoadError.Unknown("No space left on device")
 
-        val state = mediaUiStateFor(loaded, synchronizedCopy, failure, announceFailure = true) as MediaUiState.Success
+        val state = mediaUiStateFor(loaded, synchronizedCopy, failure, connected = true, announceFailure = true) as MediaUiState.Success
 
         assertTrue(state.isStale)
         assertEquals(failure, state.refreshError)

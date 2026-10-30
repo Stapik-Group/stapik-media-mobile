@@ -13,7 +13,6 @@ import pl.stapik.media.R
 sealed interface MediaLoadError {
     data object NoNetwork : MediaLoadError
     data object Unauthorized : MediaLoadError
-    data object NotFound : MediaLoadError
 
     /** The cloud data cannot be read (encrypted, wrong passphrase, newer format); [messageKey] is a library message key. */
     data class Unreadable(val messageKey: String) : MediaLoadError
@@ -55,7 +54,6 @@ private fun unreadableKey(kind: UnreadableKind): String = when (kind) {
 fun MediaLoadError.toDisplayMessage(): String = when (this) {
     MediaLoadError.NoNetwork -> stringResource(R.string.error_no_network)
     MediaLoadError.Unauthorized -> stringResource(R.string.error_unauthorized)
-    MediaLoadError.NotFound -> stringResource(R.string.error_not_found)
     is MediaLoadError.Unreadable -> Messages.text(LocalContext.current, messageKey)
     is MediaLoadError.Unknown -> stringResource(R.string.error_unknown, message)
 }

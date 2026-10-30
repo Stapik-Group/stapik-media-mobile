@@ -6,7 +6,6 @@ import pl.stapik.media.data.model.MediaEntry
 
 sealed interface MediaUiState {
     data object Loading : MediaUiState
-    data object NotConnected : MediaUiState
 
     data class Success(
         val entries: List<MediaEntry>,
@@ -16,9 +15,8 @@ sealed interface MediaUiState {
         val archiveStatus: Map<Int, ArchiveStatus> = emptyMap(),
         val unreadableEntries: Int = 0,
         val refreshError: MediaLoadError? = null,
+        val connected: Boolean = true,
     ) : MediaUiState
-
-    data class Error(val error: MediaLoadError) : MediaUiState
 
     data class LocalDataError(val kind: LoadErrorKind) : MediaUiState
 }

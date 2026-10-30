@@ -11,7 +11,7 @@
     <string name="media_consumed_read">Read %1$s</string>
     <string name="media_consumed_listened">Listened %1$s</string>
     <string name="media_consumed_completed">Completed %1$s</string>
-    <string name="media_error_not_connected">Not connected</string>
+    <string name="media_local_empty">No entries yet. Connect to the cloud to load your list.</string>
     <string name="media_action_connect">Connect</string>
 
     <string name="category_movie">Movies</string>
@@ -60,7 +60,6 @@
 
     <string name="error_no_network">No network connection.</string>
     <string name="error_unauthorized">Invalid server URL or API key.</string>
-    <string name="error_not_found">Media log not found on the server. Check your connection settings.</string>
     <string name="error_unknown">Something went wrong: %1$s</string>
 
     <string name="retry">Retry</string>

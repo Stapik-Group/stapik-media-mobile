@@ -11,7 +11,7 @@
     <string name="media_consumed_read">Przeczytano %1$s</string>
     <string name="media_consumed_listened">Przesłuchano %1$s</string>
     <string name="media_consumed_completed">Ukończono %1$s</string>
-    <string name="media_error_not_connected">Nie połączono</string>
+    <string name="media_local_empty">Brak wpisów. Połącz się z chmurą, aby wczytać swoją listę.</string>
     <string name="media_action_connect">Połącz</string>
 
     <string name="category_movie">Filmy</string>
@@ -60,7 +60,6 @@
 
     <string name="error_no_network">Brak połączenia z siecią.</string>
     <string name="error_unauthorized">Nieprawidłowy adres serwera lub klucz API.</string>
-    <string name="error_not_found">Nie znaleziono dziennika mediów na serwerze. Sprawdź ustawienia połączenia.</string>
     <string name="error_unknown">Coś poszło nie tak: %1$s</string>
 
     <string name="retry">Spróbuj ponownie</string>
