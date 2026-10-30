@@ -109,7 +109,7 @@ fun CategoryPage(
                                     SyncAction.RECONNECT, SyncAction.ENTER_PASSPHRASE -> onNavigateToConnect()
                                     SyncAction.UPDATE_APP -> uriHandler.openUri(AppInfo.RELEASES_URL)
                                     SyncAction.CHOOSE_SOURCE -> viewModel.refresh(isPullToRefresh = true)
-                                    SyncAction.DISMISS -> Unit
+                                    SyncAction.DISMISS -> viewModel.dismissNotice()
                                 }
                             },
                         )

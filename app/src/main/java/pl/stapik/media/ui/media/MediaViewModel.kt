@@ -105,7 +105,7 @@ class MediaViewModel(
         }
     }
 
-    private fun launchUpdate(keepView: Boolean, update: suspend () -> SyncOutcome?) {
+    private fun launchUpdate(keepView: Boolean, choice: FirstConnectionChoice? = null, update: suspend () -> SyncOutcome?) {
         val previous = updateJob
         updateJob = viewModelScope.launch {
             previous?.cancelAndJoin()
@@ -120,7 +120,7 @@ class MediaViewModel(
                 val state = stateAfter(update())
                 if (state is MediaUiState.Success) archives.refreshYears()
                 baseState.value = state
-                if (state is MediaUiState.Success) archives.syncLoaded()
+                if (state is MediaUiState.Success) promptForUnresolved(archives.syncLoaded(choice))
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -152,7 +152,20 @@ class MediaViewModel(
 
     fun chooseFirstConnection(choice: FirstConnectionChoice) {
         _pendingChoice.value = null
-        launchUpdate(keepView = true) { controller.sync(choice) }
+        launchUpdate(keepView = true, choice = choice) { controller.sync(choice) }
+    }
+
+    private fun promptForUnresolved(outcomes: List<SyncOutcome>) {
+        val prompt = outcomes.filterIsInstance<SyncOutcome.NeedsFirstConnectionChoice>().firstOrNull() ?: return
+        if (_pendingChoice.value == null) _pendingChoice.value = prompt
+    }
+
+    fun flushPendingSync() {
+        viewModelScope.launch { controller.flushPendingSync() }
+    }
+
+    fun dismissNotice() {
+        viewModelScope.launch { controller.dismissResolvedNotice() }
     }
 
     fun cancelFirstConnection() {

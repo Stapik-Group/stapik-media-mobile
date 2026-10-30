@@ -19,6 +19,7 @@ foundation = "1.12.0"
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 core-cloud = { module = "pl.stapik.common:core-cloud" }
 core-document = { module = "pl.stapik.common:core-document" }
+core-work = { module = "pl.stapik.common:core-work" }
 core-crypto = { module = "pl.stapik.common:core-crypto" }
 core-i18n = { module = "pl.stapik.common:core-i18n" }
 core-model = { module = "pl.stapik.common:core-model" }

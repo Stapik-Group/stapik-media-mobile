@@ -17,6 +17,8 @@ import pl.stapik.common.model.SlotKey
 import pl.stapik.common.sync.FirstConnectionChoice
 import pl.stapik.common.sync.SyncEngine
 import pl.stapik.common.sync.SyncOutcome
+import pl.stapik.common.sync.SyncRetry
+import pl.stapik.common.sync.SyncRetryPolicy
 import pl.stapik.media.data.cloud.CloudGatewayProvider
 import pl.stapik.media.data.document.TrackingDocumentStore
 import pl.stapik.media.data.library.ArchiveDirectory
@@ -30,6 +32,7 @@ class MediaArchives(
     private val cipher: PayloadCipher,
     private val gateways: CloudGatewayProvider,
     private val clock: Clock,
+    private val retry: SyncRetry,
 ) : ArchiveDirectory {
     private class Archive(val engine: SyncEngine<MediaPayload>, val store: TrackingDocumentStore)
 
@@ -56,7 +59,8 @@ class MediaArchives(
         override suspend fun current(): MediaPayload = archiveFor(year).engine.load()
 
         override suspend fun edit(transform: (MediaPayload) -> MediaPayload) {
-            archiveFor(year).engine.edit(transform)
+            val outcome = archiveFor(year).engine.edit(transform)
+            if (SyncRetryPolicy.isWorthRetrying(outcome)) retry.schedule()
             publish(year)
         }
     }
@@ -80,15 +84,16 @@ class MediaArchives(
         (storedYears() - remote).filter { isSettled(it) }.forEach { forget(it) }
     }
 
-    suspend fun syncLoaded() {
-        mutableDocuments.value.keys.forEach { sync(it) }
-    }
+    suspend fun syncLoaded(choice: FirstConnectionChoice? = null): List<SyncOutcome> =
+        mutableDocuments.value.keys.mapNotNull { sync(it, choice) }
 
-    suspend fun request(year: Int) {
+    fun engines(): List<SyncEngine<MediaPayload>> = synchronized(this) { archives.values.map { it.engine } }
+
+    suspend fun request(year: Int, choice: FirstConnectionChoice? = null) {
         if (year in mutableDocuments.value || year !in mutableYears.value) return
         mutableStatus.update { it + (year to ArchiveStatus.Loading) }
         val outcome = try {
-            sync(year)
+            sync(year, choice)
         } catch (e: CancellationException) {
             mutableStatus.update { it - year }
             throw e
@@ -96,15 +101,12 @@ class MediaArchives(
         mutableStatus.update { if (year in mutableDocuments.value) it - year else it + (year to ArchiveStatus.Failed(outcome)) }
     }
 
-    private suspend fun sync(year: Int): SyncOutcome? {
+    private suspend fun sync(year: Int, choice: FirstConnectionChoice?): SyncOutcome? {
         var result: SyncOutcome? = null
         guarded(year) { archive ->
-            val outcome = archive.engine.sync()
-            result = if (outcome is SyncOutcome.NeedsFirstConnectionChoice) {
-                archive.engine.sync(FirstConnectionChoice.USE_CLOUD)
-            } else {
-                outcome
-            }
+            val outcome = archive.engine.sync(choice)
+            if (SyncRetryPolicy.isWorthRetrying(outcome)) retry.schedule()
+            result = outcome
             publish(year)
         }
         return result

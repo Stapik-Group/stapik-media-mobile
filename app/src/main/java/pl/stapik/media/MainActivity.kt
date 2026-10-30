@@ -28,6 +28,11 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onStop() {
+        super.onStop()
+        viewModel.flushPendingSync()
+    }
+
     override fun onStart() {
         super.onStart()
         viewModel.refreshOnForeground()

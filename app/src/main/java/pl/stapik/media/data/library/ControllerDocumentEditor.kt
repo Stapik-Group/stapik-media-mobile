@@ -11,6 +11,6 @@ class ControllerDocumentEditor(
     override suspend fun current(): MediaPayload = engine.load()
 
     override suspend fun edit(transform: (MediaPayload) -> MediaPayload) {
-        controller.edit(transform)
+        controller.editDebounced(transform)
     }
 }
